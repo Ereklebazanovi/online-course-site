@@ -16,12 +16,16 @@ export default function Register() {
     e.preventDefault();
     try {
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
-      dispatch(setUser({ uid: userCred.user.uid, email: userCred.user.email }));
-      navigate('/dashboard');
+      console.log("User created:", userCred.user);
+      setError(null);
+      navigate('/login'); // ✅ redirect to login, not dashboard
     } catch (err: any) {
       setError(err.message);
+      alert("Account created! Please log in.");
+
     }
   };
+  
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 bg-white shadow rounded">
