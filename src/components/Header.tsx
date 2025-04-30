@@ -25,7 +25,7 @@ const Header = () => {
           <>
             <Link to="/dashboard">Dashboard</Link>
             <LogoutButton />
-            <button onClick={handleLogout} className="text-red-600 hover:underline">Logout</button>
+           
           </>
         ) : (
           <>
