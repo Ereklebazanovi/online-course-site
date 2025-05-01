@@ -1,8 +1,8 @@
 import { FC } from "react";
 import HeroSection from "../components/homeComponents/HeroSection";
 import FeaturedCourses from "../components/homeComponents/FeaturedCourses";
-import WhyChooseUs from "../components/homeComponents/WhyChooseUs";
-import Testimonials from "../components/homeComponents/Testimonials";
+// import WhyChooseUs from "../components/homeComponents/WhyChooseUs";
+// import Testimonials from "../components/homeComponents/Testimonials";
 import Footer from "../components/homeComponents/Footer";
 
 const Home: FC = () => {
@@ -10,8 +10,8 @@ const Home: FC = () => {
     <div className="bg-gray-50 text-gray-900">
       <HeroSection />
       <FeaturedCourses />
-      <WhyChooseUs />
-      <Testimonials />
+      {/* <WhyChooseUs /> */}
+      {/* <Testimonials /> */}
       <Footer />
     </div>
   );
