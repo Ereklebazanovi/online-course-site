@@ -1,6 +1,6 @@
 // src/layouts/MainLayout.tsx
 import { Outlet } from "react-router-dom";
-import Footer from "../components/Footer";
+
 import Navbar from "../components/Navbar";
 
 const MainLayout = () => {
@@ -10,7 +10,6 @@ const MainLayout = () => {
       <main className="flex-grow container mx-auto px-4 py-6">
         <Outlet />
       </main>
-      <Footer />
     </div>
   );
 };

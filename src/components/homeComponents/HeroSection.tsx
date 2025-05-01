@@ -1,34 +1,25 @@
-// src/components/homeComponents/HeroSection.tsx
-import { FC } from "react";
-import { Link } from "react-router-dom";
+import React, { FC } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const HeroSection: FC = () => {
+  const { user } = useAuth();
+
   return (
-    <section className="relative overflow-hidden">
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
-            Unlock Your Potential with Expert-Led Courses
-          </h1>
-          <p className="max-w-2xl mx-auto text-base sm:text-lg md:text-xl opacity-90 mb-8">
-            Start your learning journey today and transform your future with skills that matter.
-          </p>
-          <div className="flex justify-center gap-4 flex-wrap">
-            <Link
-              to="/courses"
-              className="inline-block bg-white text-blue-600 font-medium px-6 py-3 rounded-lg shadow hover:shadow-lg transition"
-            >
-              Explore Courses
-            </Link>
-            <Link
-              to="/register"
-              className="inline-block border-2 border-white text-white font-medium px-6 py-3 rounded-lg hover:bg-white hover:text-purple-600 transition"
-            >
-              Start Free Trial
-            </Link>
-          </div>
-        </div>
-      </div>
+    <section className="py-20 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      {user ? (
+        <>
+          <h1 className="text-4xl font-bold mb-4">Welcome back, {user.displayName || user.email}!</h1>
+          <Link to="/dashboard" className="mt-4 inline-block bg-white text-blue-600 py-3 px-6 rounded-lg">Go to Dashboard</Link>
+        </>
+      ) : (
+        <>
+          <h1 className="text-4xl font-bold mb-4">Unlock Your Potential with Expert-Led Courses</h1>
+          <p className="mb-6">Start your learning journey today and transform your future.</p>
+          <Link to="/courses" className="bg-white text-blue-600 py-3 px-6 rounded-lg mr-4">Explore Courses</Link>
+          <Link to="/register" className="border-2 border-white py-3 px-6 rounded-lg">Start Free Trial</Link>
+        </>
+      )}
     </section>
   );
 };

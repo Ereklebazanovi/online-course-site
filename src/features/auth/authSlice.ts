@@ -1,15 +1,50 @@
+// import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+// interface UserState {
+//   uid: string | null;
+//   email: string | null;
+//   isEmailVerified: boolean; // Added
+// }
+
+// const initialState: UserState = {
+//   uid: null,
+//   email: null,
+//   isEmailVerified: false, // Default to false
+// };
+
+// const authSlice = createSlice({
+//   name: "auth",
+//   initialState,
+//   reducers: {
+//     setUser: (state, action: PayloadAction<UserState>) => {
+//       state.uid = action.payload.uid;
+//       state.email = action.payload.email;
+//       state.isEmailVerified = action.payload.isEmailVerified; // Added
+//     },
+//     clearUser: (state) => {
+//       state.uid = null;
+//       state.email = null;
+//       state.isEmailVerified = false; // Reset
+//     },
+//   },
+// });
+
+// export const { setUser, clearUser } = authSlice.actions;
+// export default authSlice.reducer;
+/////////axali
+
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserState {
   uid: string | null;
   email: string | null;
-  isEmailVerified: boolean; // Added
+  isEmailVerified: boolean;
 }
 
 const initialState: UserState = {
   uid: null,
   email: null,
-  isEmailVerified: false, // Default to false
+  isEmailVerified: false,
 };
 
 const authSlice = createSlice({
@@ -19,12 +54,12 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<UserState>) => {
       state.uid = action.payload.uid;
       state.email = action.payload.email;
-      state.isEmailVerified = action.payload.isEmailVerified; // Added
+      state.isEmailVerified = action.payload.isEmailVerified;
     },
     clearUser: (state) => {
       state.uid = null;
       state.email = null;
-      state.isEmailVerified = false; // Reset
+      state.isEmailVerified = false;
     },
   },
 });
