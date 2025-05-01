@@ -23,7 +23,7 @@ const FeaturedCourses: React.FC = () => {
       setError(null);
       try {
         const snap = await getDocs(collection(db, "courses"));
-        const all = snap.docs.map(d => ({ slug: d.id, ...(d.data() as any) }));
+        const all = snap.docs.map(d => ({ slug: d.id, ...(d.data() as Omit<Course, "slug">) }));
         setCourses(
           category
             ? all.filter(course => course.category === category)

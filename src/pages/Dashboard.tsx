@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import CourseCard from '../components/CourseCard';
 import { Link } from 'react-router-dom';
