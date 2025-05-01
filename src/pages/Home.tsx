@@ -1,12 +1,20 @@
-// src/pages/Home.tsx
-const Home = () => {
-    return (
-      <div>
-        <h1 className="text-3xl font-bold mb-4">Welcome to OnlineCourses</h1>
-        <p className="text-gray-700">Browse, purchase, and learn at your own pace.</p>
-      </div>
-    );
-  };
-  
-  export default Home;
-  
+import { FC } from "react";
+import HeroSection from "../components/homeComponents/HeroSection";
+import FeaturedCourses from "../components/homeComponents/FeaturedCourses";
+import WhyChooseUs from "../components/homeComponents/WhyChooseUs";
+import Testimonials from "../components/homeComponents/Testimonials";
+import Footer from "../components/homeComponents/Footer";
+
+const Home: FC = () => {
+  return (
+    <div className="bg-gray-50 text-gray-900">
+      <HeroSection />
+      <FeaturedCourses />
+      <WhyChooseUs />
+      <Testimonials />
+      <Footer />
+    </div>
+  );
+};
+
+export default Home;

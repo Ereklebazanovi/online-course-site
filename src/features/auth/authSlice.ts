@@ -3,11 +3,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface UserState {
   uid: string | null;
   email: string | null;
+  isEmailVerified: boolean; // Added
 }
 
 const initialState: UserState = {
   uid: null,
   email: null,
+  isEmailVerified: false, // Default to false
 };
 
 const authSlice = createSlice({
@@ -17,10 +19,12 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<UserState>) => {
       state.uid = action.payload.uid;
       state.email = action.payload.email;
+      state.isEmailVerified = action.payload.isEmailVerified; // Added
     },
     clearUser: (state) => {
       state.uid = null;
       state.email = null;
+      state.isEmailVerified = false; // Reset
     },
   },
 });

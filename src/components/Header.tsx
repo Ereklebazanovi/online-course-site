@@ -1,41 +1,18 @@
-// src/components/Header.tsx
-import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { auth } from '../firebase';
-import { signOut } from 'firebase/auth';
-import { clearUser } from '../features/auth/authSlice';
-import LogoutButton from '../features/auth/LogoutButton'; // Import LogoutButton
+// import { Link } from "react-router-dom";
+// import Navbar from "./Navbar";
 
-const Header = () => {
-  const uid = useAppSelector((state) => state.auth.uid);
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+// const Header = () => {
+//   return (
+//     <header className="bg-white border-b shadow-sm sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+//       <Link
+//         to="/"
+//         className="text-2xl font-bold text-blue-700 hover:text-blue-800 transition"
+//       >
+//         Herald Of Digital
+//       </Link>
+//       <Navbar />
+//     </header>
+//   );
+// };
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    dispatch(clearUser());
-    navigate('/');
-  };
-
-  return (
-    <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
-      <Link to="/" className="text-2xl font-bold">OnlineCourses</Link>
-      <nav className="flex gap-4">
-        {uid ? (
-          <>
-            <Link to="/dashboard">Dashboard</Link>
-            <LogoutButton />
-           
-          </>
-        ) : (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </>
-        )}
-      </nav>
-    </header>
-  );
-};
-
-export default Header;
+// export default Header;
