@@ -91,8 +91,8 @@ const Navbar: FC = () => {
         {/* LOGO / BRAND - Left side */}
         <Link to="/" className="text-2xl md:text-3xl font-bold text-blue-600 tracking-tight flex items-center">
           <BookOutlined className="mr-2 text-2xl md:text-3xl" />
-          <span className="hidden sm:inline">Herald Of Digital</span>
-          <span className="sm:hidden">HOD</span>
+          <span className="hidden sm:inline">AlterFlow</span>
+          <span className="sm:hidden">ALF</span>
         </Link>
 
         {/* ALL NAVIGATION ELEMENTS - Right side */}
