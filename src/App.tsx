@@ -41,7 +41,8 @@ function App() {
           />
 
           {/* Course detail (public) */}
-          <Route path="courses/:slug" element={<CourseDetail />} />
+          <Route path="/courses/:courseId" element={<CourseDetail />} />
+
 
           {/* Protected pages */}
           <Route

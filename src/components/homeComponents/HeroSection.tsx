@@ -3,41 +3,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { motion } from "framer-motion";
 
-// Student-friendly featured courses
-const featuredCourses = [
-  {
-    id: 1,
-    title: "Intro to Coding for Teens",
-    category: "Development",
-    rating: 4.9,
-    students: 7200,
-    image: "https://images.unsplash.com/photo-1537432376769-00a8bfc6e0c1",
-  },
-  {
-    id: 2,
-    title: "Creative Graphic Design Basics",
-    category: "Design",
-    rating: 4.8,
-    students: 5400,
-    image: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b",
-  },
-  {
-    id: 3,
-    title: "Smart Budgeting for Students",
-    category: "Finance",
-    rating: 4.7,
-    students: 6100,
-    image: "https://images.unsplash.com/photo-1603570418743-2eb2a6a94145",
-  },
-];
-
-// Student-focused stats
-const stats = [
-  { value: "15K+", label: "High School Learners" },
-  { value: "200+", label: "Practical Courses" },
-  { value: "50+", label: "Cool Mentors" },
-  { value: "4.8 ★", label: "Average Rating" },
-];
 
 const HeroSection: FC = () => {
   const { user } = useAuth();
@@ -102,11 +67,6 @@ const HeroSection: FC = () => {
                 )}
               </h1>
 
-              {/* <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-xl">
-                {user
-                  ? "Your learning path is just one click away. Pick up where you left off."
-                  : "Whether you want to become a developer, designer, or entrepreneur – start here, at your own pace, your own way."}
-              </p> */}
 
               <div className="flex flex-wrap gap-4">
                 {user ? (

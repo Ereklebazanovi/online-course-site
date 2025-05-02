@@ -1,95 +1,68 @@
-// src/components/homeComponents/FeaturedCourses.tsx
-import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { db } from "../../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { fetchCourses } from "../../services/courseService";
+import { Course } from "../../types/Course";
+import { Link } from "react-router-dom";
 
-interface Course {
-  slug: string;
-  title: string;
-  thumbnail: string;
-  category: string;
-}
-
-const FeaturedCourses: React.FC = () => {
-  const { category } = useParams<{ category?: string }>();
+const FeaturedCourses = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError(null);
+    const loadCourses = async () => {
       try {
-        const snap = await getDocs(collection(db, "courses"));
-        const all = snap.docs.map(d => ({ slug: d.id, ...(d.data() as Omit<Course, "slug">) }));
-        setCourses(
-          category
-            ? all.filter(course => course.category === category)
-            : all
-        );
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load courses. Please try again.");
+        const data = await fetchCourses();
+        setCourses(data);
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
       } finally {
         setLoading(false);
       }
-    })();
-  }, [category]);
+    };
 
-  if (error) {
-    return (
-      <div className="p-6 text-center text-red-500">
-        {error}
-      </div>
-    );
-  }
+    loadCourses();
+  }, []);
+
+  if (loading)
+    return <div className="text-center py-8">Loading courses...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      {loading ? (
-        // Skeleton grid: 6 placeholder cards
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="space-y-4 animate-pulse border rounded p-4"
-            >
-              <div className="bg-gray-200 h-40 rounded" />
-              <div className="h-6 bg-gray-200 rounded w-3/4" />
-              <div className="h-4 bg-gray-200 rounded w-1/2" />
-            </div>
-          ))}
-        </div>
-      ) : courses.length === 0 ? (
-        <div className="p-6 text-center text-gray-600">
-          No courses found{category ? ` in “${category}”` : ""}.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map(c => (
-            <Link
-              key={c.slug}
-              to={`/courses/${c.slug}`}
-              className="block border rounded overflow-hidden hover:shadow-lg transition"
-            >
-              <img
-                src={c.thumbnail}
-                alt={c.title}
-                className="w-full h-40 object-cover"
-                loading="lazy"
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+      {courses.map((course) => (
+        <Link to={`/courses/${course.id}`} key={course.id}>
+          <div className="bg-white shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition duration-300">
+            {course.videoUrl && course.videoUrl.includes("youtube.com") ? (
+              <iframe
+                className="w-full h-48"
+                src={course.videoUrl.replace("watch?v=", "embed/")}
+                title={course.title}
+                allowFullScreen
               />
-              <div className="p-4">
-                <h3 className="font-semibold text-lg">{c.title}</h3>
-                <p className="text-sm text-gray-500 capitalize">
-                  {c.category}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+            ) : (
+              <img
+                src={course.thumbnailUrl}
+                alt={course.title}
+                className="w-full h-48 object-cover"
+              />
+            )}
+            <div className="p-5">
+              <h3 className="text-xl font-semibold text-gray-800 mb-1">
+                {course.title}
+              </h3>
+              <p className="text-sm text-gray-600 line-clamp-3">
+                {course.description}
+              </p>
+              <div className="flex items-center justify-between"> 
+  <div className="font-bold text-indigo-600 text-lg">
+    ${course.price}
+  </div>
+  <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
+    იხილეთ ვრცლად
+  </button>
+</div>
+            </div>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 };

@@ -4,7 +4,8 @@ import {
   signOut,
   sendEmailVerification,
 } from "firebase/auth";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import { useAppDispatch } from "../../app/hooks";
 import { setUser } from "./authSlice";
@@ -30,6 +31,20 @@ export default function Login() {
         );
         return;
       }
+
+      // ✅ Recreate Firestore user if missing
+      const userRef = doc(db, "users", userCred.user.uid);
+      const docSnap = await getDoc(userRef);
+      if (!docSnap.exists()) {
+        await setDoc(userRef, {
+          uid: userCred.user.uid,
+          email: userCred.user.email,
+          displayName: userCred.user.displayName || "Anonymous",
+          enrolledCourses: [],
+          createdAt: serverTimestamp(),
+        });
+      }
+
       dispatch(
         setUser({
           uid: userCred.user.uid,
@@ -90,7 +105,7 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1 p-2 w-full border border-gray-300 rounded-focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-1 p-2 w-full border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
@@ -106,7 +121,7 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="mt-1 p-2 w-full border border-gray-300 rounded-focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-1 p-2 w-full border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
