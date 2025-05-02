@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { motion } from "framer-motion";
 
-
 const HeroSection: FC = () => {
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
@@ -13,9 +12,9 @@ const HeroSection: FC = () => {
   }, []);
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-[#f0f4f8] to-[#e8f0fe]">
+    <div className="relative overflow-hidden bg-gradient-to-br from-[#f5f9ff] to-[#eaf3fe]">
       {/* Blob Background */}
-      <div className="absolute -top-40 -left-40 z-0 opacity-20">
+      <div className="absolute -top-40 -left-40 z-0 opacity-20 pointer-events-none">
         <svg
           viewBox="0 0 200 200"
           xmlns="http://www.w3.org/2000/svg"
@@ -30,94 +29,94 @@ const HeroSection: FC = () => {
       </div>
 
       {/* Hero Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-        <div className="pt-16 pb-24 md:pt-20 md:pb-32 lg:pt-24 lg:pb-40">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left Side - Text */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-20 pb-28 md:pt-24 md:pb-36 lg:pt-28 lg:pb-44">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            {/* Text Content */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: isVisible ? 1 : 0, x: isVisible ? 0 : -50 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 30 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-left"
             >
-              <span className="inline-block px-4 py-1 rounded-full bg-blue-900 bg-opacity-50 text-blue-100 text-xl font-semibold mb-6">
+              <span className="inline-block px-4 py-1 rounded-full bg-blue-800 bg-opacity-70 text-blue-100 text-sm font-semibold mb-6 tracking-wide shadow-sm">
                 ისწავლე რაც მნიშვნელოვანია ✨
               </span>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-800 leading-tight mb-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-800 leading-tight mb-6">
                 {user ? (
                   <>
-                    Welcome back,{" "}
+                    Thank you for coming back,{" "}
                     <span className="text-blue-600">
                       {user.displayName || user.email?.split("@")[0]}
                     </span>
-                    !text-xl md:text-2xl text-gray-600 mb-8 max-w-xl
+                    .
                   </>
                 ) : (
                   <>
-                    ჩვენთან სწავლა მარტივია!{" "}
-                    <span
-                      className="text-blue-600 text-4xl
-
-"
-                    >
-                      დარეგისტრირდი დღეს
-                    </span>
+                    Welcome to the{" "}
+                    <span className="text-blue-600">alternative world</span> of
+                    learning.
                   </>
                 )}
               </h1>
 
+              <p className="text-lg text-gray-600 mb-8 max-w-xl">
+                {user
+                  ? "Continue your journey with our immersive, instructor-led courses."
+                  : "Break away from traditional education — explore knowledge your way."}
+              </p>
 
               <div className="flex flex-wrap gap-4">
                 {user ? (
                   <>
                     <Link
                       to="/dashboard"
-                      className="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-full font-bold shadow-lg hover:bg-blue-700 transition duration-300 text-lg"
+                      className="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-full font-semibold shadow-lg hover:bg-blue-700 transition text-lg"
                     >
                       Go to Dashboard
                     </Link>
                     <Link
-                      to="/courses/recommended"
-                      className="inline-flex items-center px-8 py-4 border-2 border-blue-600 text-blue-600 rounded-full font-bold hover:bg-blue-600 hover:text-white transition duration-300 text-lg"
+                      to="/courses"
+                      className="inline-flex items-center px-8 py-4 border-2 border-blue-600 text-blue-600 rounded-full font-semibold hover:bg-blue-600 hover:text-white transition text-lg"
                     >
-                      Discover More
+                      Explore Courses
                     </Link>
                   </>
                 ) : (
                   <>
                     <Link
                       to="/courses"
-                      className="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-full font-bold shadow-lg hover:bg-blue-700 transition duration-300 text-lg"
+                      className="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-full font-semibold shadow-lg hover:bg-blue-700 transition text-lg"
                     >
-                      იხილე კურსები
+                      View Courses
                     </Link>
                     <Link
                       to="/register"
-                      className="inline-flex items-center px-8 py-4 border-2 border-blue-600 text-blue-600 rounded-full font-bold hover:bg-blue-600 hover:text-white transition duration-300 text-lg"
+                      className="inline-flex items-center px-8 py-4 border-2 border-blue-600 text-blue-600 rounded-full font-semibold hover:bg-blue-600 hover:text-white transition text-lg"
                     >
-                      მასწავლებლები
+                      Get Started
                     </Link>
                   </>
                 )}
               </div>
             </motion.div>
 
-            {/* Right Side - Embedded Video */}
+            {/* Video Section */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: isVisible ? 1 : 0, x: isVisible ? 0 : 50 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 30 }}
               transition={{ duration: 0.8, delay: 0.4 }}
               className="hidden lg:block"
             >
-              <div className="w-full h-auto max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-2xl aspect-[16/9]">
+              <div className="w-full max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-xl aspect-[16/9]">
                 <iframe
                   src="https://www.youtube.com/embed/Mg9yzpeICo4"
-                  title="How to Study for Exams - Motivation & Study Techniques"
+                  title="Welcome to the Alternative World"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="w-full h-full"
-                ></iframe>
+                />
               </div>
             </motion.div>
           </div>

@@ -1,293 +1,227 @@
-"use client"
+"use client";
 
-import { type FC, useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import { useAuth } from "../contexts/AuthContext"
-import { Menu, Dropdown, Button, Drawer, Avatar, Badge } from "antd"
+import { FC, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import {
-  ReadOutlined,
+  Avatar,
+  Badge,
+  Button,
+  Drawer,
+  Dropdown,
+  Menu,
+  Divider,
+} from "antd";
+import {
+  BookOutlined,
   DashboardOutlined,
   LogoutOutlined,
   UserOutlined,
   UserAddOutlined,
+  ReadOutlined,
   MenuOutlined,
-  DownOutlined,
   CloseOutlined,
-  BookOutlined,
-} from "@ant-design/icons"
+  DownOutlined,
+} from "@ant-design/icons";
 
 const Navbar: FC = () => {
-  const { user, logout } = useAuth()
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const [avatarError, setAvatarError] = useState(false)
+  const { user, logout } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
-  // Handle scroll effect for navbar
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-  const categories = ["english", "mathematics", "history", "georgian"]
+  const categories = ["english", "mathematics", "history", "georgian"];
   const categoryItems = categories.map((slug) => ({
     key: slug,
+    icon: <ReadOutlined className="text-blue-500" />,
     label: (
       <Link
         to={`/courses/category/${slug}`}
         onClick={() => setDrawerOpen(false)}
-        className="capitalize text-gray-700 hover:text-blue-600 transition-colors"
+        className="capitalize block text-gray-700 hover:text-blue-600"
       >
         {slug.charAt(0).toUpperCase() + slug.slice(1)}
       </Link>
     ),
-    icon: <ReadOutlined className="text-blue-500" />,
-  }))
-
-  const getInitials = (name: string) => {
-    if (!name) return ""
-    const parts = name.split(" ")
-    return parts
-      .map((p) => p[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-  }
+  }));
 
   const userMenuItems = [
     {
+      key: "dashboard",
+      icon: <DashboardOutlined />,
+      label: <Link to="/dashboard">ჩემი კურსები</Link>,
+    },
+    {
       key: "profile",
-      label: (
-        <Link to="/profile" className="text-gray-700 hover:text-blue-600">
-          Profile
-        </Link>
-      ),
-      icon: <UserOutlined className="text-blue-500" />,
+      icon: <UserOutlined />,
+      label: <Link to="/profile">Profile</Link>,
     },
     {
       key: "logout",
-      label: <span className="text-gray-700 hover:text-blue-600">Logout</span>,
       icon: <LogoutOutlined className="text-red-500" />,
-      onClick: logout,
+      label: (
+        <span className="text-red-500" onClick={logout}>
+          Logout
+        </span>
+      ),
     },
-  ]
+  ];
 
-  // Assuming user.email exists and we can generate a Gravatar URL
-  // This is a common way to get avatar from email
-  const getGravatarUrl = (email: string) => {
-    const hash = email ? email.trim().toLowerCase() : ""
-    return `https://www.gravatar.com/avatar/${hash}?d=mp&s=40`
-  }
+  const getGravatarUrl = (email: string) =>
+    `https://www.gravatar.com/avatar/${email?.trim().toLowerCase()}?d=mp&s=64`;
+
+  const getInitials = (name: string) =>
+    name
+      ?.split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "U";
 
   return (
     <nav
-      className={`fixed top-0 w-full bg-white z-50 transition-all duration-300 ${
-        scrolled ? "shadow-md bg-white/95 backdrop-blur-md" : "bg-white"
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/80 backdrop-blur-md shadow-md"
+          : "bg-white/95 backdrop-blur-sm"
       }`}
     >
-      <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-        {/* LOGO / BRAND - Left side */}
-        <Link to="/" className="text-2xl md:text-3xl font-bold text-blue-600 tracking-tight flex items-center">
-          <BookOutlined className="mr-2 text-2xl md:text-3xl" />
-          <span className="hidden sm:inline">AlterFlow</span>
-          <span className="sm:hidden">ALF</span>
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        {/* Brand */}
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-2xl font-bold text-blue-600"
+        >
+          <BookOutlined />
+          <span className="hidden sm:block">AlterFlow</span>
+          <span className="sm:hidden">AF</span>
         </Link>
 
-        {/* ALL NAVIGATION ELEMENTS - Right side */}
-        <div className="flex items-center space-x-4 md:space-x-6">
-          {/* Username display for logged in users - visible on medium screens and up */}
-          {user && (
-            <div className="hidden md:block text-gray-700 font-medium">
-              <span>Welcome,{user.displayName || user.email}!</span>
-            </div>
+        {/* Desktop Menu */}
+        <div className="hidden md:flex items-center gap-6">
+          <Dropdown menu={{ items: categoryItems }} trigger={["hover"]}>
+            <Button type="text" className="text-gray-700 hover:text-blue-600 font-medium">
+              Categories <DownOutlined className="ml-1 text-xs" />
+            </Button>
+          </Dropdown>
+
+          {!user ? (
+            <>
+              <Link to="/login">
+                <Button type="text" className="text-gray-700 hover:text-blue-600">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button
+                  type="primary"
+                  className="bg-blue-600 hover:bg-blue-700 border-none"
+                >
+                  Register
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Link to="/dashboard">
+              <Button
+                icon={<DashboardOutlined />}
+                className="hover:border-blue-500 text-gray-700"
+              >
+                ჩემი კურსები
+              </Button>
+            </Link>
           )}
 
-          {/* DESKTOP MENU */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Dropdown
-              menu={{ items: categoryItems }}
-              trigger={["hover"]}
-              placement="bottomCenter"
-              overlayClassName="shadow-lg rounded-md overflow-hidden"
-            >
-              <Button
-                type="text"
-                className="flex items-center gap-1 font-medium text-gray-700 hover:text-blue-600 h-10"
-              >
-                Courses <DownOutlined className="text-xs ml-1" />
-              </Button>
-            </Dropdown>
-
-            {!user ? (
-              <>
-                <Link to="/login">
-                  <Button type="text" className="font-medium text-gray-700 hover:text-blue-600 h-10">
-                    Login
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button
-                    type="primary"
-                    className="font-medium h-10 px-5 bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 rounded-md shadow-sm"
-                  >
-                    Register
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link to="/dashboard">
-                  <Button
-                    icon={<DashboardOutlined />}
-                    className="font-medium h-10 text-gray-700 hover:text-blue-600 border-gray-200 hover:border-blue-600"
-                  >
-                    My Courses
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* USER AVATAR - Always visible when logged in */}
           {user && (
-            <Dropdown
-              menu={{ items: userMenuItems }}
-              trigger={["hover"]}
-              placement="bottomRight"
-              overlayClassName="shadow-lg rounded-md overflow-hidden"
-            >
-              <Button
-                type="text"
-                className="flex items-center gap-2 font-medium text-gray-700 hover:text-blue-600 h-10 pl-2 pr-3"
-              >
+            <Dropdown menu={{ items: userMenuItems }} trigger={["click"]}>
+              <Button type="text" className="flex items-center gap-2">
                 <Badge dot={false}>
                   {!avatarError && user.email ? (
                     <Avatar
                       src={getGravatarUrl(user.email)}
-                      className="flex items-center justify-center"
-                      size="small"
                       onError={() => setAvatarError(true)}
                     />
                   ) : (
-                    <Avatar className="bg-blue-600 flex items-center justify-center" size="small">
-                      {getInitials(user.name || "")}
+                    <Avatar className="bg-blue-600 text-white">
+                      {getInitials(user.displayName || "")}
                     </Avatar>
                   )}
                 </Badge>
-                <span className="hidden sm:block max-w-[120px] truncate">{user.name}</span>
-                <DownOutlined className="text-xs" />
+                <span className="text-gray-700 hidden sm:block">
+                  {user.displayName || "User"}
+                </span>
               </Button>
             </Dropdown>
           )}
-
-          {/* BURGER MENU BUTTON - MOBILE ONLY */}
-          <Button
-            type="text"
-            icon={<MenuOutlined className="text-xl text-gray-700" />}
-            onClick={() => setDrawerOpen(true)}
-            className="md:hidden h-10 w-10 flex items-center justify-center"
-          />
         </div>
+
+        {/* Mobile Menu Button */}
+        <Button
+          icon={<MenuOutlined />}
+          className="md:hidden"
+          type="text"
+          onClick={() => setDrawerOpen(true)}
+        />
       </div>
 
-      {/* MOBILE DRAWER MENU */}
+      {/* Mobile Drawer */}
       <Drawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        placement="right"
+        width={300}
         title={
-          <div className="flex items-center justify-between border-b pb-3">
-            <div className="flex items-center gap-2">
-              {user ? (
-                <>
-                  {!avatarError && user.email ? (
-                    <Avatar src={getGravatarUrl(user.email)} onError={() => setAvatarError(true)} />
-                  ) : (
-                    <Avatar className="bg-blue-600">{getInitials(user.name || "")}</Avatar>
-                  )}
-                  <span className="font-medium text-gray-800">{user.name}</span>
-                </>
-              ) : (
-                <span className="font-medium text-gray-800">Menu</span>
-              )}
-            </div>
+          <div className="flex justify-between items-center">
+            <span className="font-medium text-lg">
+              {user?.displayName || "Menu"}
+            </span>
             <Button
               type="text"
               icon={<CloseOutlined />}
               onClick={() => setDrawerOpen(false)}
-              className="flex items-center justify-center h-8 w-8"
             />
           </div>
         }
-        closeIcon={null}
-        placement="right"
-        width={300}
-        bodyStyle={{ padding: "16px 0" }}
-        headerStyle={{ padding: "16px", borderBottom: "none" }}
       >
-        <Menu mode="inline" onClick={() => setDrawerOpen(false)} className="border-none">
-          <Menu.ItemGroup key="courses" title="Course Categories">
+        <Menu mode="inline" onClick={() => setDrawerOpen(false)}>
+          <Menu.ItemGroup key="categories" title="Course Categories">
             {categoryItems.map((item) => (
-              <Menu.Item key={item.key} icon={item.icon} className="hover:text-blue-600">
+              <Menu.Item key={item.key} icon={item.icon}>
                 {item.label}
               </Menu.Item>
             ))}
           </Menu.ItemGroup>
 
-          <Menu.Divider className="my-4" />
+          <Divider />
 
-          {user ? (
-            <Menu.ItemGroup key="account" title="My Account">
-              <Menu.Item
-                key="dashboard"
-                icon={<DashboardOutlined className="text-blue-500" />}
-                className="hover:text-blue-600"
-              >
-                <Link to="/dashboard" className="text-gray-700 hover:text-blue-600">
-                  My Courses
-                </Link>
+          {!user ? (
+            <Menu.ItemGroup key="guest" title="Authentication">
+              <Menu.Item key="login" icon={<UserOutlined />}>
+                <Link to="/login">Login</Link>
               </Menu.Item>
-              <Menu.Item
-                key="profile"
-                icon={<UserOutlined className="text-blue-500" />}
-                className="hover:text-blue-600"
-              >
-                <Link to="/profile" className="text-gray-700 hover:text-blue-600">
-                  Profile
-                </Link>
-              </Menu.Item>
-              <Menu.Item
-                key="logout"
-                icon={<LogoutOutlined className="text-red-500" />}
-                onClick={logout}
-                className="hover:text-red-600"
-              >
-                <span className="text-gray-700 hover:text-red-600">Logout</span>
+              <Menu.Item key="register" icon={<UserAddOutlined />}>
+                <Link to="/register">Register</Link>
               </Menu.Item>
             </Menu.ItemGroup>
           ) : (
-            <Menu.ItemGroup key="auth" title="Authentication">
-              <Menu.Item key="login" icon={<UserOutlined className="text-blue-500" />} className="hover:text-blue-600">
-                <Link to="/login" className="text-gray-700 hover:text-blue-600">
-                  Login
-                </Link>
-              </Menu.Item>
-              <Menu.Item
-                key="register"
-                icon={<UserAddOutlined className="text-green-500" />}
-                className="hover:text-green-600"
-              >
-                <Link to="/register" className="text-gray-700 hover:text-green-600">
-                  Register
-                </Link>
-              </Menu.Item>
+            <Menu.ItemGroup key="user" title="My Account">
+              {userMenuItems.map((item) => (
+                <Menu.Item key={item.key} icon={item.icon}>
+                  {item.label}
+                </Menu.Item>
+              ))}
             </Menu.ItemGroup>
           )}
         </Menu>
       </Drawer>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

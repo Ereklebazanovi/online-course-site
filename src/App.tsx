@@ -1,5 +1,9 @@
-// src/App.tsx
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import MainLayout from "./layouts/MainLayout";
 
@@ -20,9 +24,13 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public pages inside MainLayout */}
+        {/* Auth pages outside layout */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Public + Protected pages inside MainLayout */}
         <Route element={<MainLayout />}>
-          {/* Home */}
+          {/* Public routes */}
           <Route
             index
             element={
@@ -32,21 +40,16 @@ function App() {
               </>
             }
           />
-
-          {/* All courses & filtering */}
-          <Route path="courses" element={<FeaturedCourses />} />
+          <Route path="/courses" element={<FeaturedCourses />} />
           <Route
-            path="courses/category/:category"
+            path="/courses/category/:category"
             element={<FeaturedCourses />}
           />
-
-          {/* Course detail (public) */}
           <Route path="/courses/:courseId" element={<CourseDetail />} />
 
-
-          {/* Protected pages */}
+          {/* Protected routes */}
           <Route
-            path="dashboard"
+            path="/dashboard"
             element={
               <PrivateRoute>
                 <Dashboard />
@@ -54,7 +57,7 @@ function App() {
             }
           />
           <Route
-            path="profile"
+            path="/profile"
             element={
               <PrivateRoute>
                 <Profile />
@@ -62,7 +65,7 @@ function App() {
             }
           />
           <Route
-            path="courses/:slug/content"
+            path="/courses/:slug/content"
             element={
               <PrivateRoute>
                 <CourseContent />
@@ -71,14 +74,8 @@ function App() {
           />
         </Route>
 
-        {/* Auth pages outside the main layout */}
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-
-        {/* Fallback – redirect everything else to home */}
-        <Route path="*" element={<MainLayout />}>
-          <Route index element={<FeaturedCourses />} />
-        </Route>
+        {/* Catch-all fallback route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

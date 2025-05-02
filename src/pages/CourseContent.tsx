@@ -1,52 +1,74 @@
-// src/pages/CourseContent.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { getAuth } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
 
-const CourseContent: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const { user } = useAuth();
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+const CourseContent = () => {
+  const { slug } = useParams(); // slug = courseId
+  const [isEnrolled, setIsEnrolled] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [courseData, setCourseData] = useState<any>(null); // optional if you want course info
 
   useEffect(() => {
-    if (!user) return;
+    const checkEnrollment = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
 
-    (async () => {
-      // Check in "purchases" collection for a paid record
-      const q = query(
-        collection(db, "purchases"),
-        where("userId", "==", user.uid),
-        where("courseSlug", "==", slug),
-        where("status", "==", "paid")
-      );
-      const snap = await getDocs(q);
-      setHasAccess(!snap.empty);
-    })();
-  }, [user, slug]);
+      if (!user || !slug) {
+        setIsEnrolled(false);
+        setLoading(false);
+        return;
+      }
 
-  if (hasAccess === null) {
-    return <div className="p-6 text-center">Checking access…</div>;
-  }
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.data();
 
-  if (!hasAccess) {
-    // no paid purchase found → redirect home
-    return <Navigate to="/" replace />;
+        if (userData?.enrolledCourses?.includes(slug)) {
+          setIsEnrolled(true);
+
+          // Optional: Load course details
+          const courseRef = doc(db, "courses", slug);
+          const courseSnap = await getDoc(courseRef);
+          if (courseSnap.exists()) {
+            setCourseData(courseSnap.data());
+          }
+        } else {
+          setIsEnrolled(false);
+        }
+      } catch (err) {
+        console.error("Enrollment check failed", err);
+        setIsEnrolled(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkEnrollment();
+  }, [slug]);
+
+  if (loading) return <div className="p-6 text-center">Checking access...</div>;
+
+  if (!isEnrolled) {
+    return (
+      <div className="max-w-xl mx-auto p-6 mt-10 text-center border rounded shadow">
+        <h2 className="text-xl font-bold mb-2 text-red-600">Access Denied</h2>
+        <p className="text-gray-600">You must enroll in this course to view the content.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* TODO: replace this placeholder with your real video player or lesson UI */}
-      <h1 className="text-2xl font-bold mb-4">
-        Course Content for &ldquo;{slug}&rdquo;
-      </h1>
-      <p>🎉 You have access! Now build out your lesson player here.</p>
+    <div className="max-w-4xl mx-auto p-6 mt-10 bg-white shadow rounded">
+      <h1 className="text-2xl font-bold mb-4">{courseData?.title}</h1>
+      <p className="text-gray-700 mb-4">{courseData?.description}</p>
+
+      {/* Render video or modules here */}
+      <div className="bg-gray-100 p-4 rounded">
+        <p className="text-gray-600">[📚 Course lessons and videos will appear here...]</p>
+      </div>
     </div>
   );
 };
