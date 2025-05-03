@@ -3,6 +3,9 @@
 import { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useLoginModal } from "../contexts/LoginModalContext";
+import { useRegisterModal } from "../contexts/RegisterModalContext"; 
+
 import {
   Avatar,
   Badge,
@@ -22,10 +25,14 @@ import {
   MenuOutlined,
   CloseOutlined,
   DownOutlined,
+  LoginOutlined,
 } from "@ant-design/icons";
 
 const Navbar: FC = () => {
   const { user, logout } = useAuth();
+  const { open: openLoginModal } = useLoginModal();
+  const { open: openRegisterModal } = useRegisterModal(); // ✅
+
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
@@ -106,26 +113,31 @@ const Navbar: FC = () => {
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6">
           <Dropdown menu={{ items: categoryItems }} trigger={["hover"]}>
-            <Button type="text" className="text-gray-700 hover:text-blue-600 font-medium">
+            <Button
+              type="text"
+              className="text-gray-700 hover:text-blue-600 font-medium"
+            >
               Categories <DownOutlined className="ml-1 text-xs" />
             </Button>
           </Dropdown>
 
           {!user ? (
             <>
-              <Link to="/login">
-                <Button type="text" className="text-gray-700 hover:text-blue-600">
-                  Login
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button
-                  type="primary"
-                  className="bg-blue-600 hover:bg-blue-700 border-none"
-                >
-                  Register
-                </Button>
-              </Link>
+              <Button
+                type="text"
+                onClick={openLoginModal}
+                className="text-gray-700 hover:text-blue-600"
+                icon={<LoginOutlined />}
+              >
+                Login
+              </Button>
+              <Button
+                type="primary"
+                className="bg-blue-600 hover:bg-blue-700 border-none"
+                onClick={openRegisterModal} // ✅
+              >
+                Register
+              </Button>
             </>
           ) : (
             <Link to="/dashboard">
@@ -202,11 +214,25 @@ const Navbar: FC = () => {
 
           {!user ? (
             <Menu.ItemGroup key="guest" title="Authentication">
-              <Menu.Item key="login" icon={<UserOutlined />}>
-                <Link to="/login">Login</Link>
+              <Menu.Item
+                key="login"
+                icon={<UserOutlined />}
+                onClick={() => {
+                  setDrawerOpen(false);
+                  openLoginModal(); // ✅
+                }}
+              >
+                Login
               </Menu.Item>
-              <Menu.Item key="register" icon={<UserAddOutlined />}>
-                <Link to="/register">Register</Link>
+              <Menu.Item
+                key="register"
+                icon={<UserAddOutlined />}
+                onClick={() => {
+                  setDrawerOpen(false);
+                  openRegisterModal(); // ✅
+                }}
+              >
+                Register
               </Menu.Item>
             </Menu.ItemGroup>
           ) : (

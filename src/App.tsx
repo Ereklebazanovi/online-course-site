@@ -3,15 +3,12 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 
 import MainLayout from "./layouts/MainLayout";
-
 import HeroSection from "./components/homeComponents/HeroSection";
 import FeaturedCourses from "./components/homeComponents/FeaturedCourses";
-
-import Login from "./features/auth/Login";
-import Register from "./features/auth/Register";
 
 import Dashboard from "./pages/Dashboard";
 import CourseDetail from "./pages/CourseDetail";
@@ -20,17 +17,26 @@ import Profile from "./pages/Profile";
 
 import PrivateRoute from "./components/PrivateRoute";
 
-function App() {
-  return (
-    <Router>
-      <Routes>
-        {/* Auth pages outside layout */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+import LoginModal from "./features/auth/LoginModal";
+import RegisterModal from "./features/auth/RegisterModal";
 
-        {/* Public + Protected pages inside MainLayout */}
+import { useLoginModal } from "./contexts/LoginModalContext";
+import { useRegisterModal } from "./contexts/RegisterModalContext";
+
+function AppContent() {
+  const location = useLocation();
+  const { show: loginShow, close: loginClose } = useLoginModal();
+  const { show: registerShow, close: registerClose } = useRegisterModal();
+
+  return (
+    <>
+      {/* Global modals rendered once, with redirect path */}
+      <LoginModal open={loginShow} onClose={loginClose} redirectTo={location.pathname} />
+      <RegisterModal open={registerShow} onClose={registerClose} />
+
+      <Routes>
         <Route element={<MainLayout />}>
-          {/* Public routes */}
+          {/* Public pages */}
           <Route
             index
             element={
@@ -41,13 +47,11 @@ function App() {
             }
           />
           <Route path="/courses" element={<FeaturedCourses />} />
-          <Route
-            path="/courses/category/:category"
-            element={<FeaturedCourses />}
-          />
+          <Route path="/courses/category/:category" element={<FeaturedCourses />} />
           <Route path="/courses/:courseId" element={<CourseDetail />} />
+          <Route path="/courses/:courseId/content" element={<CourseContent />} />
 
-          {/* Protected routes */}
+          {/* Protected pages */}
           <Route
             path="/dashboard"
             element={
@@ -64,19 +68,19 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/courses/:slug/content"
-            element={
-              <PrivateRoute>
-                <CourseContent />
-              </PrivateRoute>
-            }
-          />
         </Route>
 
-        {/* Catch-all fallback route */}
+        {/* Fallback route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
