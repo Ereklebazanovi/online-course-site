@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { Modal, Input, Button, Alert } from "antd";
 import Typography from "antd/es/typography";
 import { useAppDispatch } from "../../app/hooks";
-import { setUser } from "./authSlice";
+import { setUser } from "../../features/auth/authSlice";
 import { useLoginModal } from "../../contexts/LoginModalContext";
 
 const { Title, Text } = Typography;

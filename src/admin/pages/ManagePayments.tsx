@@ -1,0 +1,35 @@
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
+import { Table } from "antd";
+
+const ManagePayments = () => {
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      const snapshot = await getDocs(collection(db, "payments"));
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setPayments(data);
+      setLoading(false);
+    };
+    fetchPayments();
+  }, []);
+
+  const columns = [
+    { title: "User ID", dataIndex: "userId", key: "userId" },
+    { title: "Amount", dataIndex: "amount", key: "amount" },
+    { title: "Course ID", dataIndex: "courseId", key: "courseId" },
+    { title: "Status", dataIndex: "status", key: "status" },
+  ];
+
+  return (
+    <div className="p-6">
+      <h2 className="text-2xl font-bold mb-4">Manage Payments</h2>
+      <Table rowKey="id" columns={columns} dataSource={payments} loading={loading} />
+    </div>
+  );
+};
+
+export default ManagePayments;

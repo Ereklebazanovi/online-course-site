@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface Props { slug: string; title: string; thumbnail: string; }
 const CourseCard: FC<Props> = ({ slug, title, thumbnail }) => {

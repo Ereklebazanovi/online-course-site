@@ -7,6 +7,6 @@ export interface Course {
     videoUrl?: string;
     teacherName: string;
     category: string;
-    createdAt: any; // Or Timestamp if you import from Firebase
+    createdAt: any; 
   }
   

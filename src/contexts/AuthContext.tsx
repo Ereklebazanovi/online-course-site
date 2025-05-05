@@ -1,24 +1,46 @@
-import React, { createContext, useContext, useEffect, useState, useMemo, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  ReactNode,
+} from "react";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  User,
 } from "firebase/auth";
 import { auth, db } from "../firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
+
+// Custom user type that includes isAdmin
+interface ExtendedUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  isAdmin: boolean;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: ExtendedUser | null;
   loading: boolean;
   purchasedCourses: string[];
-  signup: (email: string, password: string) => Promise<User>;
-  login: (email: string, password: string) => Promise<User>;
+  signup: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
@@ -26,44 +48,70 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasedCourses, setPurchasedCourses] = useState<string[]>([]);
 
-  // Track auth state
+  // Auth state change listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const userRef = doc(db, "users", firebaseUser.uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.exists() ? userSnap.data() : {};
+
+        setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          isAdmin: userData?.isAdmin || false,
+        });
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
+
     return unsubscribe;
   }, []);
 
-  // Fetch purchased courses when user logs in
+  // Listen for purchases
   useEffect(() => {
     if (!user) return;
     const q = query(
-      collection(db, 'purchases'),
-      where('userId', '==', user.uid),
-      where('status', '==', 'paid')
+      collection(db, "purchases"),
+      where("userId", "==", user.uid),
+      where("status", "==", "paid")
     );
+
     const unsubscribe = onSnapshot(q, (snap) => {
       const slugs = snap.docs.map((d) => d.data().courseSlug as string);
       setPurchasedCourses(slugs);
     });
+
     return unsubscribe;
   }, [user]);
 
-  const signup = (email: string, password: string) =>
-    createUserWithEmailAndPassword(auth, email, password).then((cred) => cred.user);
+  const signup = async (email: string, password: string) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    // Firestore user document creation handled elsewhere
+  };
 
-  const login = (email: string, password: string) =>
-    signInWithEmailAndPassword(auth, email, password).then((cred) => cred.user);
+  const login = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password);
+  };
 
   const logout = () => signOut(auth);
 
   const value = useMemo(
-    () => ({ user, loading, purchasedCourses, signup, login, logout }),
+    () => ({
+      user,
+      loading,
+      purchasedCourses,
+      signup,
+      login,
+      logout,
+    }),
     [user, loading, purchasedCourses]
   );
 
