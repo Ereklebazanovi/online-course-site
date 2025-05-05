@@ -102,7 +102,7 @@ const RegisterModal = ({ open, onClose }: Props) => {
             handleRegister();
           }}
         >
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <Input
               placeholder="Full Name"
               value={displayName}

@@ -131,7 +131,7 @@ const LoginModal = ({ open, onClose }: Props) => {
             handleSubmit();
           }}
         >
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <Input
               placeholder="Email Address"
               type="email"

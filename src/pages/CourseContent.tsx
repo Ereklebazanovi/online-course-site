@@ -191,7 +191,9 @@ const CourseContent = () => {
           <div className="lg:w-2/3 w-full space-y-6">
             {selectedLesson && (
               <>
-                <h2 className="text-xl font-bold text-gray-800">{selectedLesson.title}</h2>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {selectedLesson.title}
+                </h2>
 
                 {switching ? (
                   <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />
@@ -207,7 +209,8 @@ const CourseContent = () => {
                   </div>
                 ) : (
                   <div className="bg-yellow-100 text-yellow-800 p-4 rounded-lg text-sm flex items-center gap-2 shadow-sm">
-                    <LockOutlined /> This lesson is locked. Please enroll to unlock.
+                    <LockOutlined /> This lesson is locked. Please enroll to
+                    unlock.
                   </div>
                 )}
               </>
@@ -219,7 +222,8 @@ const CourseContent = () => {
                   Want full access?
                 </h3>
                 <p className="text-gray-600 mb-4 text-sm">
-                  Get lifetime access to all lessons, projects, and a certificate of completion.
+                  Get lifetime access to all lessons, projects, and a
+                  certificate of completion.
                 </p>
                 <Button
                   type="primary"
