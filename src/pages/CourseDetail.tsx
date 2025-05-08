@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { Course } from "../types/Course";
-import { Skeleton, Alert, Tag, Button } from "antd";
+import { Alert, Tag, Button } from "antd";
+import Skeleton from "antd/es/skeleton";
 
 const CourseDetail = () => {
   const { courseId } = useParams();

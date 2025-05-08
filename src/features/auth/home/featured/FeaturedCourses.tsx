@@ -116,39 +116,94 @@
 // export default FeaturedCourses;
 
 
+// import { useEffect, useState } from "react";
+// import { fetchCourses } from "../../../../services/courseService";
+// import { Course } from "../../../../types/Course";
+// import Skeleton from "antd/es/skeleton";
+// import CourseCard from "./CourseCard";
+
+// const FeaturedCourses = () => {
+//   const [courses, setCourses] = useState<Course[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const loadCourses = async () => {
+//       try {
+//         const data = await fetchCourses();
+//         setCourses(data);
+//       } catch (error) {
+//         console.error("Failed to fetch courses:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     loadCourses();
+//   }, []);
+
+//   if (loading) {
+//     return (
+//       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
+//         {[...Array(6)].map((_, i) => (
+//           <Skeleton key={i} active paragraph={{ rows: 3 }} className="rounded-xl" />
+//         ))}
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="p-6">
+//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+//         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+//           🌟 შემოთავაზებული კურსები
+//         </h2>
+//         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+//           {courses.map((course, index) => (
+//             <CourseCard key={course.id} course={course} index={index} />
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default FeaturedCourses;
+
+
+
+
+
 import { useEffect, useState } from "react";
 import { fetchCourses } from "../../../../services/courseService";
 import { Course } from "../../../../types/Course";
-import Skeleton from "antd/es/skeleton";
+import { Skeleton, Button } from "antd";
 import CourseCard from "./CourseCard";
+import { DocumentData } from "firebase/firestore";
 
 const FeaturedCourses = () => {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [lastDoc, setLastDoc] = useState<DocumentData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const loadCourses = async (initial = false) => {
+    if (initial) setLoading(true);
+    else setLoadingMore(true);
+
+    try {
+      const result = await fetchCourses(initial ? undefined : lastDoc || undefined);
+      setCourses((prev) => [...prev, ...result.courses]);
+      setLastDoc(result.lastDoc);
+    } catch (error) {
+      console.error("Failed to fetch courses:", error);
+    } finally {
+      if (initial) setLoading(false);
+      else setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
-    const loadCourses = async () => {
-      try {
-        const data = await fetchCourses();
-        setCourses(data);
-      } catch (error) {
-        console.error("Failed to fetch courses:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCourses();
+    loadCourses(true);
   }, []);
-
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
-        {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} active paragraph={{ rows: 3 }} className="rounded-xl" />
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="p-6">
@@ -156,11 +211,39 @@ const FeaturedCourses = () => {
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
           🌟 შემოთავაზებული კურსები
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {courses.map((course, index) => (
-            <CourseCard key={course.id} course={course} index={index} />
-          ))}
-        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton
+                key={i}
+                active
+                paragraph={{ rows: 3 }}
+                className="rounded-xl"
+              />
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+              {courses.map((course, index) => (
+                <CourseCard key={course.id} course={course} index={index} />
+              ))}
+            </div>
+
+            {lastDoc && (
+              <div className="text-center mt-10">
+                <Button
+                  onClick={() => loadCourses()}
+                  loading={loadingMore}
+                  className="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-6 py-2 rounded"
+                >
+                  Load More
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

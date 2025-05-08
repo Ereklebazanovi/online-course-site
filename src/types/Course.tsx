@@ -3,11 +3,10 @@ export interface Course {
   title: string;
   description: string;
   price: number;
-
   thumbnailUrl: string;
   videoUrl?: string;
   teacherName: string;
   category: string;
-  createdAt: any;
+  createdAt: Date;
   level?: string;
 }

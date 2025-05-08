@@ -1,14 +1,29 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase";
-import { Table, Button, Popconfirm, message, Space, Typography } from "antd";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import {
+  Table,
+  Button,
+  Popconfirm,
+  message,
+  Space,
+  Typography,
+} from "antd";
+import {
+  DeleteOutlined,
+  PlusOutlined,
+  BookOutlined,
+} from "@ant-design/icons";
+import AddCourseModal from "../components/AddCourseModal";
 
 const { Title, Paragraph } = Typography;
 
 const ManageCourses = () => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -65,14 +80,23 @@ const ManageCourses = () => {
       title: "Actions",
       key: "actions",
       render: (_: any, record: any) => (
-        <Popconfirm
-          title="Are you sure to delete this course?"
-          onConfirm={() => deleteCourse(record.id)}
-        >
-          <Button danger size="small" icon={<DeleteOutlined />}>
-            Delete
+        <Space>
+          <Button
+            icon={<BookOutlined />}
+            size="small"
+            onClick={() => navigate(`/admin/courses/${record.id}/lessons`)}
+          >
+            Lessons
           </Button>
-        </Popconfirm>
+          <Popconfirm
+            title="Are you sure to delete this course?"
+            onConfirm={() => deleteCourse(record.id)}
+          >
+            <Button danger size="small" icon={<DeleteOutlined />}>
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -90,7 +114,7 @@ const ManageCourses = () => {
           type="primary"
           icon={<PlusOutlined />}
           className="bg-blue-600"
-          onClick={() => message.info("Course creation not implemented yet.")}
+          onClick={() => setAddModalOpen(true)}
         >
           Add Course
         </Button>
@@ -103,6 +127,12 @@ const ManageCourses = () => {
         loading={loading}
         pagination={{ pageSize: 8 }}
         bordered
+      />
+
+      <AddCourseModal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onSuccess={fetchCourses}
       />
     </div>
   );
