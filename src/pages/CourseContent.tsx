@@ -8,6 +8,8 @@ import {
   arrayUnion,
   getDocs,
   collection,
+  setDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import Skeleton from "antd/es/skeleton";
@@ -124,6 +126,14 @@ const CourseContent = () => {
           enrolledCourses: arrayUnion(courseId),
           [`progress.${courseId}`]: 0,
         });
+
+        await setDoc(doc(db, "purchases", `${user.uid}_${courseId}`), {
+          userId: user.uid,
+          courseId,
+          status: "paid",
+          createdAt: serverTimestamp(),
+        });
+
         setEnrolled(true);
       } catch (err) {
         console.error("Enrollment failed", err);

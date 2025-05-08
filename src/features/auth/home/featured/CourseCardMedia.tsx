@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Course } from "../../../types/Course";
+import { Course } from "../../../../types/Course";
 
 const CourseCardMedia: FC<{ course: Course }> = ({ course }) => {
   return (

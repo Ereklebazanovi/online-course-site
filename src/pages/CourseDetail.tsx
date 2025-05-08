@@ -54,7 +54,7 @@ const CourseDetail = () => {
               <div className="flex flex-wrap gap-3 mb-4">
                 <Tag color="blue">Instructor: {course.teacherName}</Tag>
                 <Tag color="purple">Category: {course.category || "General"}</Tag>
-                <Tag color="gold">Level: {course.level || "All Levels"}</Tag>
+                <Tag color="gold">Level: {course?.level || "All Levels"}</Tag>
               </div>
 
               <div className="mb-6 space-y-4">

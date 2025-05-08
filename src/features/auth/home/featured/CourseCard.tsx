@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Course } from "../../../types/Course";
+import { Course } from "../../../../types/Course";
 import CourseCardMedia from "./CourseCardMedia";
 import CourseCardContent from "./CourseCardContent";
 
