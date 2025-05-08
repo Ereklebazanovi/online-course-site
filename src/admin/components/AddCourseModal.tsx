@@ -1,14 +1,7 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { Modal, Form, Input, InputNumber, Select, message } from "antd";
-
-import {
-  collection,
-  doc,
-  setDoc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { collection, doc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase";
-
 import TextArea from "antd/lib/input/TextArea";
 import { v4 as uuidv4 } from "uuid";
 
@@ -16,44 +9,58 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialValues?: any | null;
 }
 
-const AddCourseModal: FC<Props> = ({ open, onClose, onSuccess }) => {
+const AddCourseModal: FC<Props> = ({ open, onClose, onSuccess, initialValues }) => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
+  const isEditMode = Boolean(initialValues?.id);
+
+  useEffect(() => {
+    if (open && initialValues) {
+      form.setFieldsValue(initialValues);
+    } else {
+      form.resetFields();
+    }
+  }, [initialValues, open]);
 
   const handleFinish = async (values: any) => {
     setSubmitting(true);
     try {
-      const courseId = uuidv4();
-      const courseRef = doc(db, "courses", courseId);
+      if (isEditMode) {
+        const courseRef = doc(db, "courses", initialValues.id);
+        await updateDoc(courseRef, {
+          ...values,
+          updatedAt: serverTimestamp(),
+        });
+        message.success("Course updated successfully!");
+      } else {
+        const courseId = uuidv4();
+        const courseRef = doc(db, "courses", courseId);
 
-      // 1. Create course document
-      await setDoc(courseRef, {
-        title: values.title,
-        description: values.description,
-        price: values.price,
-        category: values.category,
-        thumbnailUrl: values.thumbnailUrl || "",
-        videoUrl: values.videoUrl || "",
-        createdAt: serverTimestamp(),
-      });
+        await setDoc(courseRef, {
+          ...values,
+          createdAt: serverTimestamp(),
+        });
 
-      // 2. Create default lesson
-      await setDoc(doc(courseRef, "lessons", "intro"), {
-        title: "Welcome & Introduction",
-        videoUrl: values.videoUrl || "",
-        isPreview: true,
-        position: 1,
-      });
+        // Default first lesson
+        await setDoc(doc(courseRef, "lessons", "intro"), {
+          title: "Welcome & Introduction",
+          videoUrl: values.videoUrl || "",
+          isPreview: true,
+          position: 1,
+        });
 
-      message.success("Course and default lesson added successfully!");
+        message.success("Course and default lesson added successfully!");
+      }
+
       form.resetFields();
       onClose();
       onSuccess();
     } catch (err) {
-      console.error("Error adding course:", err);
-      message.error("Failed to add course.");
+      console.error("Error saving course:", err);
+      message.error("Failed to save course.");
     } finally {
       setSubmitting(false);
     }
@@ -65,8 +72,8 @@ const AddCourseModal: FC<Props> = ({ open, onClose, onSuccess }) => {
       onCancel={onClose}
       onOk={() => form.submit()}
       confirmLoading={submitting}
-      title="Add New Course"
-      okText="Add Course"
+      title={isEditMode ? "Edit Course" : "Add New Course"}
+      okText={isEditMode ? "Save Changes" : "Add Course"}
     >
       <Form layout="vertical" form={form} onFinish={handleFinish}>
         <Form.Item
@@ -74,16 +81,20 @@ const AddCourseModal: FC<Props> = ({ open, onClose, onSuccess }) => {
           label="Course Title"
           rules={[{ required: true }]}
         >
-          <Input id="course-title" placeholder="Enter course title" />
+          <Input placeholder="Enter course title" />
         </Form.Item>
         <Form.Item
           name="description"
           label="Description"
           rules={[{ required: true }]}
         >
-          <TextArea rows={3} placeholder="Short description of the course" />
+          <TextArea rows={3} placeholder="Short course description" />
         </Form.Item>
-        <Form.Item name="price" label="Price" rules={[{ required: true }]}>
+        <Form.Item
+          name="price"
+          label="Price"
+          rules={[{ required: true }]}
+        >
           <InputNumber
             min={0}
             className="w-full"
@@ -103,10 +114,10 @@ const AddCourseModal: FC<Props> = ({ open, onClose, onSuccess }) => {
           </Select>
         </Form.Item>
         <Form.Item name="thumbnailUrl" label="Thumbnail URL">
-          <Input placeholder="Optional image or video preview URL" />
+          <Input placeholder="Optional image URL" />
         </Form.Item>
         <Form.Item name="videoUrl" label="Intro Video (YouTube)">
-          <Input placeholder="Optional video link" />
+          <Input placeholder="Optional YouTube link" />
         </Form.Item>
       </Form>
     </Modal>

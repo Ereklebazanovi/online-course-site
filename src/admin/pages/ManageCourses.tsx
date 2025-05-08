@@ -14,6 +14,7 @@ import {
   DeleteOutlined,
   PlusOutlined,
   BookOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import AddCourseModal from "../components/AddCourseModal";
 
@@ -23,6 +24,7 @@ const ManageCourses = () => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<any | null>(null);
   const navigate = useNavigate();
 
   const fetchCourses = async () => {
@@ -88,13 +90,21 @@ const ManageCourses = () => {
           >
             Lessons
           </Button>
+          <Button
+            icon={<EditOutlined />}
+            size="small"
+            onClick={() => {
+              setEditingCourse(record);
+              setAddModalOpen(true);
+            }}
+          >
+            Edit
+          </Button>
           <Popconfirm
             title="Are you sure to delete this course?"
             onConfirm={() => deleteCourse(record.id)}
           >
-            <Button danger size="small" icon={<DeleteOutlined />}>
-              Delete
-            </Button>
+            <Button danger size="small" icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
@@ -107,14 +117,17 @@ const ManageCourses = () => {
         <div>
           <Title level={3}>Manage Courses</Title>
           <Paragraph type="secondary">
-            Here you can view, manage, and delete available courses.
+            View, edit, or delete courses and manage lessons per course.
           </Paragraph>
         </div>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           className="bg-blue-600"
-          onClick={() => setAddModalOpen(true)}
+          onClick={() => {
+            setEditingCourse(null);
+            setAddModalOpen(true);
+          }}
         >
           Add Course
         </Button>
@@ -131,8 +144,12 @@ const ManageCourses = () => {
 
       <AddCourseModal
         open={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
+        onClose={() => {
+          setAddModalOpen(false);
+          setEditingCourse(null);
+        }}
         onSuccess={fetchCourses}
+        initialValues={editingCourse}
       />
     </div>
   );

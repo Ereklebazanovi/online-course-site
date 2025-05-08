@@ -5,6 +5,7 @@ import {
   getDocs,
   addDoc,
   deleteDoc,
+  updateDoc,
   doc,
   serverTimestamp,
 } from "firebase/firestore";
@@ -21,13 +22,18 @@ import {
   Popconfirm,
   Space,
 } from "antd";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 
 const ManageLessons = () => {
   const { courseId } = useParams();
   const [lessons, setLessons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingLesson, setEditingLesson] = useState<any | null>(null);
   const [form] = Form.useForm();
 
   const fetchLessons = async () => {
@@ -39,13 +45,12 @@ const ManageLessons = () => {
     setLoading(false);
   };
 
-  const addLesson = async (values: any) => {
+  const handleAdd = async (values: any) => {
     try {
       await addDoc(collection(db, "courses", courseId!, "lessons"), {
-        title: values.title,
-        videoUrl: values.videoUrl,
-        position: values.position ?? 999,
+        ...values,
         isPreview: values.isPreview || false,
+        position: values.position ?? 999,
         createdAt: serverTimestamp(),
       });
       message.success("Lesson added");
@@ -54,6 +59,26 @@ const ManageLessons = () => {
       fetchLessons();
     } catch {
       message.error("Failed to add lesson");
+    }
+  };
+
+  const handleEdit = async (values: any) => {
+    try {
+      await updateDoc(
+        doc(db, "courses", courseId!, "lessons", editingLesson.id),
+        {
+          ...values,
+          isPreview: values.isPreview || false,
+          position: values.position ?? 999,
+        }
+      );
+      message.success("Lesson updated");
+      setModalOpen(false);
+      form.resetFields();
+      setEditingLesson(null);
+      fetchLessons();
+    } catch {
+      message.error("Failed to update lesson");
     }
   };
 
@@ -75,7 +100,15 @@ const ManageLessons = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Manage Lessons</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            form.resetFields();
+            setEditingLesson(null);
+            setModalOpen(true);
+          }}
+        >
           Add Lesson
         </Button>
       </div>
@@ -95,14 +128,25 @@ const ManageLessons = () => {
             title: "Actions",
             render: (_: any, record: any) => (
               <Space>
-                {/* ❌ Delete button */}
+                {/* ✏️ Edit */}
+                <Button
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={() => {
+                    form.setFieldsValue(record);
+                    setEditingLesson(record);
+                    setModalOpen(true);
+                  }}
+                >
+                  Edit
+                </Button>
+
+                {/* ❌ Delete */}
                 <Popconfirm
                   title="Delete this lesson?"
                   onConfirm={() => deleteLesson(record.id)}
                 >
-                  <Button danger size="small" icon={<DeleteOutlined />}>
-                    Delete
-                  </Button>
+                  <Button danger size="small" icon={<DeleteOutlined />} />
                 </Popconfirm>
               </Space>
             ),
@@ -114,21 +158,40 @@ const ManageLessons = () => {
 
       <Modal
         open={modalOpen}
-        onCancel={() => setModalOpen(false)}
+        onCancel={() => {
+          setModalOpen(false);
+          setEditingLesson(null);
+        }}
         onOk={() => form.submit()}
-        title="Add Lesson"
+        title={editingLesson ? "Edit Lesson" : "Add Lesson"}
       >
-        <Form form={form} layout="vertical" onFinish={addLesson}>
-          <Form.Item name="title" label="Lesson Title" rules={[{ required: true }]}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={editingLesson ? handleEdit : handleAdd}
+        >
+          <Form.Item
+            name="title"
+            label="Lesson Title"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="videoUrl" label="YouTube Link" rules={[{ required: true }]}>
+          <Form.Item
+            name="videoUrl"
+            label="YouTube Link"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
           <Form.Item name="position" label="Order">
             <InputNumber min={1} />
           </Form.Item>
-          <Form.Item name="isPreview" label="Preview Video" valuePropName="checked">
+          <Form.Item
+            name="isPreview"
+            label="Preview Video"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
         </Form>
