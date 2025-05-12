@@ -7,8 +7,7 @@ import {
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { Modal, Input, Button, Alert } from "antd";
-import Typography from "antd/es/typography";
+import { Modal, Input, Button, Alert, Typography } from "antd";
 import { useAppDispatch } from "../../app/hooks";
 import { setUser } from "../../features/auth/authSlice";
 
@@ -66,12 +65,32 @@ const LoginModal: FC<LoginModalProps> = ({ open, onClose, redirectTo }) => {
 
       onClose();
       navigate(redirectTo || "/");
-    } catch (err: any) {
-      let msg = err.message;
-      if (err.code === "auth/user-not-found")
-        msg = "No account found with this email.";
-      else if (err.code === "auth/wrong-password")
-        msg = "Incorrect password. Try again.";
+    } catch (err: unknown) {
+      let msg = "Login failed. Please try again.";
+
+      // ✅ Narrowing logic
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "message" in err &&
+        typeof err.message === "string"
+      ) {
+        msg = err.message;
+      }
+
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        typeof err.code === "string"
+      ) {
+        if (err.code === "auth/user-not-found") {
+          msg = "No account found with this email.";
+        } else if (err.code === "auth/wrong-password") {
+          msg = "Incorrect password. Try again.";
+        }
+      }
+
       setError(msg);
     } finally {
       setLoading(false);
@@ -89,7 +108,6 @@ const LoginModal: FC<LoginModalProps> = ({ open, onClose, redirectTo }) => {
   };
 
   return (
-    
     <Modal
       open={open}
       onCancel={onClose}
@@ -169,7 +187,6 @@ const LoginModal: FC<LoginModalProps> = ({ open, onClose, redirectTo }) => {
         </div>
       </>
     </Modal>
-  
   );
 };
 

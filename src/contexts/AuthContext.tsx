@@ -93,8 +93,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [user]);
 
   const signup = async (email: string, password: string) => {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    // Firestore user document creation handled elsewhere
+    await createUserWithEmailAndPassword(auth, email, password);
+    // Optionally: create a Firestore user doc here
   };
 
   const login = async (email: string, password: string) => {

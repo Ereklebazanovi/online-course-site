@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Link } from "react-router-dom";
-import { Avatar, Badge, Button, Dropdown, Menu } from "antd";
+import { Avatar, Badge, Button, Dropdown, MenuProps } from "antd";
 import {
   DashboardOutlined,
   DownOutlined,
@@ -11,7 +11,7 @@ import {
 } from "@ant-design/icons";
 
 interface Props {
-  user: any;
+  user: { email?: string; displayName?: string; isAdmin?: boolean } | null;
   logout: () => void;
   openLoginModal: () => void;
   openRegisterModal: () => void;
@@ -24,7 +24,8 @@ const NavDesktopMenu: FC<Props> = ({
   openRegisterModal,
 }) => {
   const categories = ["english", "mathematics", "history", "georgian"];
-  const categoryItems = categories.map((slug) => ({
+
+  const categoryItems: MenuProps["items"] = categories.map((slug) => ({
     key: slug,
     icon: <ReadOutlined className="text-blue-500" />,
     label: (
@@ -37,7 +38,7 @@ const NavDesktopMenu: FC<Props> = ({
     ),
   }));
 
-  const userMenuItems = [
+  const userMenuItems: MenuProps["items"] = [
     {
       key: "dashboard",
       icon: <DashboardOutlined />,
@@ -52,7 +53,7 @@ const NavDesktopMenu: FC<Props> = ({
       key: "logout",
       icon: <LogoutOutlined className="text-red-500" />,
       label: (
-        <span className="text-red-500" onClick={logout}>
+        <span className="text-red-500 cursor-pointer" onClick={logout}>
           Logout
         </span>
       ),
@@ -60,11 +61,11 @@ const NavDesktopMenu: FC<Props> = ({
   ];
 
   const getGravatarUrl = (email: string) =>
-    `https://www.gravatar.com/avatar/${email?.trim().toLowerCase()}?d=mp&s=64`;
+    `https://www.gravatar.com/avatar/${email.trim().toLowerCase()}?d=mp&s=64`;
 
   const getInitials = (name: string) =>
     name
-      ?.split(" ")
+      .split(" ")
       .map((n) => n[0])
       .join("")
       .toUpperCase()
@@ -73,10 +74,7 @@ const NavDesktopMenu: FC<Props> = ({
   return (
     <div className="hidden md:flex items-center gap-6">
       <Dropdown menu={{ items: categoryItems }} trigger={["hover"]}>
-        <Button
-          type="text"
-          className="text-gray-700 hover:text-blue-600 font-medium"
-        >
+        <Button type="text" className="text-gray-700 hover:text-blue-600 font-medium">
           Categories <DownOutlined className="ml-1 text-xs" />
         </Button>
       </Dropdown>
@@ -109,8 +107,9 @@ const NavDesktopMenu: FC<Props> = ({
               ჩემი კურსები
             </Button>
           </Link>
+
           <Dropdown menu={{ items: userMenuItems }} trigger={["click"]}>
-            <Button type="text" className="flex items-center gap-2">
+            <div className="flex items-center gap-2 cursor-pointer">
               <Badge dot={false}>
                 {user.email ? (
                   <Avatar src={getGravatarUrl(user.email)} />
@@ -125,10 +124,12 @@ const NavDesktopMenu: FC<Props> = ({
               </span>
               {user?.isAdmin && (
                 <Link to="/admin">
-                  <Button>Admin Panel</Button>
+                  <Button size="small" type="primary">
+                    Admin Panel
+                  </Button>
                 </Link>
               )}
-            </Button>
+            </div>
           </Dropdown>
         </>
       )}

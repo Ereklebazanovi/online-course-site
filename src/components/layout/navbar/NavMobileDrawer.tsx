@@ -16,7 +16,7 @@ import {
 } from "@ant-design/icons";
 
 interface Props {
-  user: any;
+  user: { displayName?: string; isAdmin?: boolean } | null;
   drawerOpen: boolean;
   setDrawerOpen: (open: boolean) => void;
   logout: () => void;

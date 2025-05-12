@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import {
   doc,
@@ -37,7 +37,6 @@ const getEmbedUrl = (url: string): string => {
 
 const CourseContent = () => {
   const { courseId } = useParams();
-  const navigate = useNavigate();
   const location = useLocation();
   const auth = getAuth();
   const { open: openLoginModal } = useLoginModal();
