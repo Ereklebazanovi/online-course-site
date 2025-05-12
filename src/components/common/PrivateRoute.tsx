@@ -1,4 +1,6 @@
-import React, { ReactNode } from "react";
+// File: src/components/common/PrivateRoute.tsx
+
+import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -6,7 +8,7 @@ interface PrivateRouteProps {
   children: ReactNode;
 }
 
-const PrivateRoute = ({ children }: PrivateRouteProps): JSX.Element => {
+const PrivateRoute = ({ children }: PrivateRouteProps) => {
   const { user } = useAuth();
 
   if (user === undefined) {

@@ -11,6 +11,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  User as FirebaseUser,
 } from "firebase/auth";
 import { auth, db } from "../firebase";
 import {
@@ -22,12 +23,13 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 
-// Custom user type that includes isAdmin
-interface ExtendedUser {
+// ✅ Custom user type including Firebase user for secure operations
+export interface ExtendedUser {
   uid: string;
   email: string | null;
   displayName: string | null;
   isAdmin: boolean;
+  firebaseUser: FirebaseUser;
 }
 
 interface AuthContextType {
@@ -52,7 +54,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
   const [purchasedCourses, setPurchasedCourses] = useState<string[]>([]);
 
-  // Auth state change listener
+  // ✅ Auth state change listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -65,6 +67,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           email: firebaseUser.email,
           displayName: firebaseUser.displayName,
           isAdmin: userData?.isAdmin || false,
+          firebaseUser, // ✅ Add raw Firebase user for secured operations
         });
       } else {
         setUser(null);
@@ -75,7 +78,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return unsubscribe;
   }, []);
 
-  // Listen for purchases
+  // ✅ Listen for course purchases
   useEffect(() => {
     if (!user) return;
     const q = query(
@@ -94,7 +97,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signup = async (email: string, password: string) => {
     await createUserWithEmailAndPassword(auth, email, password);
-    // Optionally: create a Firestore user doc here
   };
 
   const login = async (email: string, password: string) => {

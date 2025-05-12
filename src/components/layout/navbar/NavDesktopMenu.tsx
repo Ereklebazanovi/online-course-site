@@ -9,9 +9,10 @@ import {
   UserOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
+import type { ExtendedUser } from "../../../contexts/AuthContext";
 
 interface Props {
-  user: { email?: string; displayName?: string; isAdmin?: boolean } | null;
+  user: ExtendedUser | null;
   logout: () => void;
   openLoginModal: () => void;
   openRegisterModal: () => void;

@@ -14,15 +14,17 @@ import {
   DashboardOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
+import type { ExtendedUser } from "../../../contexts/AuthContext";
 
 interface Props {
-  user: { displayName?: string; isAdmin?: boolean } | null;
+  user: ExtendedUser | null;
   drawerOpen: boolean;
   setDrawerOpen: (open: boolean) => void;
   logout: () => void;
   openLoginModal: () => void;
   openRegisterModal: () => void;
 }
+
 
 const NavMobileDrawer: FC<Props> = ({
   user,

@@ -115,7 +115,6 @@
 
 // export default FeaturedCourses;
 
-
 // import { useEffect, useState } from "react";
 // import { fetchCourses } from "../../../../services/courseService";
 // import { Course } from "../../../../types/Course";
@@ -168,15 +167,10 @@
 
 // export default FeaturedCourses;
 
-
-
-
-
 import { useEffect, useState } from "react";
 import { fetchCourses } from "../../../../services/courseService";
 import { Course } from "../../../../types/Course";
 import Skeleton from "antd/es/skeleton";
-import { Button } from "antd";
 import CourseCard from "./CourseCard";
 import { DocumentData } from "firebase/firestore";
 
@@ -184,21 +178,23 @@ const FeaturedCourses = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [lastDoc, setLastDoc] = useState<DocumentData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  // const [loadingMore, setLoadingMore] = useState(false);
 
   const loadCourses = async (initial = false) => {
     if (initial) setLoading(true);
-    else setLoadingMore(true);
+    // else setLoadingMore(true); ❌ remove this
 
     try {
-      const result = await fetchCourses(initial ? undefined : lastDoc || undefined);
+      const result = await fetchCourses(
+        initial ? undefined : lastDoc || undefined
+      );
       setCourses((prev) => [...prev, ...result.courses]);
       setLastDoc(result.lastDoc);
     } catch (error) {
       console.error("Failed to fetch courses:", error);
     } finally {
       if (initial) setLoading(false);
-      else setLoadingMore(false);
+      // else setLoadingMore(false); ❌ remove this
     }
   };
 

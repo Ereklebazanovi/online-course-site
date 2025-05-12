@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from "react";
 import { Modal, Form, Input, InputNumber, Select, message } from "antd";
-import { collection, doc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import TextArea from "antd/lib/input/TextArea";
 import { v4 as uuidv4 } from "uuid";
@@ -12,7 +12,12 @@ interface Props {
   initialValues?: any | null;
 }
 
-const AddCourseModal: FC<Props> = ({ open, onClose, onSuccess, initialValues }) => {
+const AddCourseModal: FC<Props> = ({
+  open,
+  onClose,
+  onSuccess,
+  initialValues,
+}) => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const isEditMode = Boolean(initialValues?.id);
@@ -23,7 +28,7 @@ const AddCourseModal: FC<Props> = ({ open, onClose, onSuccess, initialValues }) 
     } else {
       form.resetFields();
     }
-  }, [initialValues, open]);
+  }, [initialValues, open, form]);
 
   const handleFinish = async (values: any) => {
     setSubmitting(true);
@@ -90,11 +95,7 @@ const AddCourseModal: FC<Props> = ({ open, onClose, onSuccess, initialValues }) 
         >
           <TextArea rows={3} placeholder="Short course description" />
         </Form.Item>
-        <Form.Item
-          name="price"
-          label="Price"
-          rules={[{ required: true }]}
-        >
+        <Form.Item name="price" label="Price" rules={[{ required: true }]}>
           <InputNumber
             min={0}
             className="w-full"
