@@ -175,7 +175,8 @@
 import { useEffect, useState } from "react";
 import { fetchCourses } from "../../../../services/courseService";
 import { Course } from "../../../../types/Course";
-import { Skeleton, Button } from "antd";
+import Skeleton from "antd/es/skeleton";
+import { Button } from "antd";
 import CourseCard from "./CourseCard";
 import { DocumentData } from "firebase/firestore";
 
@@ -231,7 +232,7 @@ const FeaturedCourses = () => {
               ))}
             </div>
 
-            {lastDoc && (
+            {/* {lastDoc && (
               <div className="text-center mt-10">
                 <Button
                   onClick={() => loadCourses()}
@@ -241,7 +242,7 @@ const FeaturedCourses = () => {
                   Load More
                 </Button>
               </div>
-            )}
+            )} */}
           </>
         )}
       </div>

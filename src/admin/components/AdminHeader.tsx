@@ -1,10 +1,12 @@
-import { FC } from "react";
+import { FC } from "react"; 
 import { useAuth } from "../../contexts/AuthContext";
-import { Avatar, Dropdown, Menu } from "antd";
-import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import { Avatar, Dropdown, Menu, Button } from "antd";
+import { LogoutOutlined, UserOutlined, HomeOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const AdminHeader: FC = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const menu = (
     <Menu>
@@ -27,7 +29,17 @@ const AdminHeader: FC = () => {
 
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-white border-b shadow-sm sticky top-0 z-30">
-      <h1 className="text-xl font-semibold text-gray-800">Admin Dashboard</h1>
+      <div className="flex items-center gap-4">
+        <h1 className="text-xl font-semibold text-gray-800">Admin Dashboard</h1>
+        <Button
+          type="default"
+          icon={<HomeOutlined />}
+          size="small"
+          onClick={() => navigate("/")}
+        >
+        UserSide
+        </Button>
+      </div>
 
       <Dropdown overlay={menu} placement="bottomRight" arrow>
         <div className="flex items-center gap-3 cursor-pointer">

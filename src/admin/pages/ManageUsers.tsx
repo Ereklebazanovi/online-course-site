@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import { Table, Tag } from "antd";
+import { ColumnsType } from "antd/es/table";
 
 interface UserRecord {
   id: string;
@@ -39,7 +40,7 @@ const ManageUsers = () => {
     fetchUsers();
   }, []);
 
-  const columns = [
+  const columns: ColumnsType<UserRecord> = [
     {
       title: "Email",
       dataIndex: "email",
@@ -63,7 +64,7 @@ const ManageUsers = () => {
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Manage Users</h2>
       <Table
-        rowKey="id"
+        rowKey={(record) => record.id}
         columns={columns}
         dataSource={users}
         loading={loading}
