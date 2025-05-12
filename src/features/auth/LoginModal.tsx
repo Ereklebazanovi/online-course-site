@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FC, useState } from "react";
 import {
   signInWithEmailAndPassword,
   signOut,
@@ -11,16 +11,16 @@ import { Modal, Input, Button, Alert } from "antd";
 import Typography from "antd/es/typography";
 import { useAppDispatch } from "../../app/hooks";
 import { setUser } from "../../features/auth/authSlice";
-import { useLoginModal } from "../../contexts/LoginModalContext";
 
 const { Title, Text } = Typography;
 
-interface Props {
+interface LoginModalProps {
   open: boolean;
   onClose: () => void;
+  redirectTo?: string;
 }
 
-const LoginModal = ({ open, onClose }: Props) => {
+const LoginModal: FC<LoginModalProps> = ({ open, onClose, redirectTo }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,6 @@ const LoginModal = ({ open, onClose }: Props) => {
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { redirectTo } = useLoginModal();
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -46,6 +45,7 @@ const LoginModal = ({ open, onClose }: Props) => {
 
       const userRef = doc(db, "users", userCred.user.uid);
       const userSnap = await getDoc(userRef);
+
       if (!userSnap.exists()) {
         await setDoc(userRef, {
           uid: userCred.user.uid,
@@ -65,7 +65,7 @@ const LoginModal = ({ open, onClose }: Props) => {
       );
 
       onClose();
-      navigate(redirectTo || "/"); // ✅ Go back to where user came from
+      navigate(redirectTo || "/");
     } catch (err: any) {
       let msg = err.message;
       if (err.code === "auth/user-not-found")
@@ -89,6 +89,7 @@ const LoginModal = ({ open, onClose }: Props) => {
   };
 
   return (
+    
     <Modal
       open={open}
       onCancel={onClose}
@@ -97,69 +98,78 @@ const LoginModal = ({ open, onClose }: Props) => {
       width={500}
       destroyOnClose
     >
-      <div className="px-6 py-6">
-        <Title level={3} className="text-center mb-1">
-          Log in to Your Account
-        </Title>
-        <Text type="secondary" className="block text-center mb-5">
-          Access your enrolled courses, progress, and certificates.
-        </Text>
+      <>
+        <div className="px-6 py-6">
+          <Title level={3} className="text-center mb-1">
+            Log in to Your Account
+          </Title>
+          <Text type="secondary" className="block text-center mb-5">
+            Access your enrolled courses, progress, and certificates.
+          </Text>
 
-        {error && (
-          <Alert
-            message={error}
-            type="error"
-            showIcon
-            className="mb-4"
-            action={
-              error.includes("verify") && (
-                <Button size="small" type="link" onClick={handleResendVerification}>
-                  Resend Email
-                </Button>
-              )
-            }
-          />
-        )}
-
-        {info && (
-          <Alert message={info} type="success" showIcon className="mb-4" />
-        )}
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit();
-          }}
-        >
-          <div className="flex flex-col gap-4">
-            <Input
-              placeholder="Email Address"
-              type="email"
-              value={email}
-              size="large"
-              onChange={(e) => setEmail(e.target.value)}
+          {error && (
+            <Alert
+              message={error}
+              type="error"
+              showIcon
+              className="mb-4"
+              action={
+                error.includes("verify") && (
+                  <Button
+                    size="small"
+                    type="link"
+                    onClick={handleResendVerification}
+                  >
+                    Resend Email
+                  </Button>
+                )
+              }
             />
-            <Input.Password
-              placeholder="Password"
-              value={password}
-              size="large"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          )}
 
-          <Button
-            htmlType="submit"
-            type="primary"
-            size="large"
-            block
-            loading={loading}
-            className="mt-6 bg-blue-600 hover:bg-blue-700 border-none"
+          {info && (
+            <div className="mb-4">
+              <Alert message={info} type="success" showIcon />
+            </div>
+          )}
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
           >
-            Login
-          </Button>
-        </form>
-      </div>
+            <div className="flex flex-col gap-4">
+              <Input
+                placeholder="Email Address"
+                type="email"
+                value={email}
+                size="large"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Input.Password
+                placeholder="Password"
+                value={password}
+                size="large"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <Button
+              htmlType="submit"
+              type="primary"
+              size="large"
+              block
+              loading={loading}
+              className="mt-6 bg-blue-600 hover:bg-blue-700 border-none"
+            >
+              Login
+            </Button>
+          </form>
+        </div>
+      </>
     </Modal>
+  
   );
 };
 
