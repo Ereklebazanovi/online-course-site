@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, updateDoc, arrayRemove } from "firebase/firestore";
 import { db } from "../firebase";
-import { Course } from "../types/Course";
+import { Course } from "../courses/types/Course";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
@@ -114,7 +114,8 @@ const Dashboard = () => {
     });
   };
 
-  if (loading) return <div className="text-center py-10">იტვირთება თქვენი კურსები...</div>;
+  if (loading)
+    return <div className="text-center py-10">იტვირთება თქვენი კურსები...</div>;
   if (error) return <div className="text-center text-red-500">{error}</div>;
 
   return (
@@ -126,7 +127,10 @@ const Dashboard = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {courses.map((course) => (
-            <div key={course.id} className="bg-white rounded-lg shadow-md overflow-hidden relative">
+            <div
+              key={course.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden relative"
+            >
               {/* ✅ Completed badge */}
               {progressMap[course.id] === 100 && (
                 <div className="absolute top-2 right-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded">
@@ -141,7 +145,9 @@ const Dashboard = () => {
               />
               <div className="p-4">
                 <h2 className="text-lg font-semibold">{course.title}</h2>
-                <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  {course.description}
+                </p>
 
                 {progressMap[course.id] !== undefined && (
                   <div className="mt-3">

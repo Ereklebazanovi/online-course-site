@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Tag } from "antd";
-import { Course } from "../../../../types/Course";
+import { Course } from "../../types/Course";
 
 const CourseCardContent: FC<{ course: Course }> = ({ course }) => (
   <div className="p-5 flex flex-col flex-grow">

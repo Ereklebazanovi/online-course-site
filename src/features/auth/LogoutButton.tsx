@@ -1,6 +1,3 @@
-
-
-
 // import { signOut } from 'firebase/auth';
 // import { auth } from '../../firebase';
 // import { useDispatch } from 'react-redux';
@@ -29,11 +26,8 @@
 //   );
 // }
 
-
-
-
 import { useAppDispatch } from "../../app/hooks";
-import { logoutUser } from "./authSlice";
+import { logoutUser } from "../../courses/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
 export default function LogoutButton() {

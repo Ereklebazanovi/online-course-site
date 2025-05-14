@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { Course } from "../types/Course";
+import { Course } from "../courses/types/Course";
 import { Alert, Tag, Button } from "antd";
 import Skeleton from "antd/es/skeleton";
 
@@ -49,12 +49,16 @@ const CourseDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             {/* Left - Course Info */}
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">{course.title}</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                {course.title}
+              </h1>
               <p className="text-gray-700 mb-4">{course.description}</p>
 
               <div className="flex flex-wrap gap-3 mb-4">
                 <Tag color="blue">Instructor: {course.teacherName}</Tag>
-                <Tag color="purple">Category: {course.category || "General"}</Tag>
+                <Tag color="purple">
+                  Category: {course.category || "General"}
+                </Tag>
                 <Tag color="gold">Level: {course?.level || "All Levels"}</Tag>
               </div>
 

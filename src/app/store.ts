@@ -1,6 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { combineReducers } from "redux";
-import authReducer from "../features/auth/authSlice";
+// src/app/store.ts
+
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import {
   persistStore,
   persistReducer,
@@ -13,16 +13,25 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
-const rootReducer = combineReducers({
-  auth: authReducer,
-});
+import authReducer from "../courses/slices/authSlice";
+import coursesReducer from "../courses/slices/coursesSlice"; // ✅ Import courses reducer
 
-const persistConfig = {
-  key: "root",
+// Optional: separate persist config just for auth
+const authPersistConfig = {
+  key: "auth",
   storage,
+  blacklist: ["loading", "error"], // Don't persist volatile state
 };
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const rootReducer = combineReducers({
+  auth: persistReducer(authPersistConfig, authReducer),
+  courses: coursesReducer, // ✅ Add courses to root reducer
+});
+
+const persistedReducer = persistReducer(
+  { key: "root", storage, blacklist: ["courses"] }, // Optional: exclude courses from root-level persist
+  rootReducer
+);
 
 export const store = configureStore({
   reducer: persistedReducer,

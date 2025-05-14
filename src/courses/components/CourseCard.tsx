@@ -1,9 +1,9 @@
 import { FC } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Course } from "../../../../types/Course";
-import CourseCardMedia from "./CourseCardMedia";
-import CourseCardContent from "./CourseCardContent";
+import { Course } from "../types/Course";
+import CourseCardMedia from "./courseCard/CourseCardMedia";
+import CourseCardContent from "./courseCard/CourseCardContent";
 
 interface Props {
   course: Course;

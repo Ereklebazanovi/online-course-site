@@ -9,7 +9,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { Modal, Input, Button, Alert, Typography } from "antd";
 import { useAppDispatch } from "../../app/hooks";
-import { setUser } from "../../features/auth/authSlice";
+import { setUser } from "../../courses/slices/authSlice";
 
 const { Title, Text } = Typography;
 

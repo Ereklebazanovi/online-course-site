@@ -7,7 +7,7 @@ import {
   getDocs,
   DocumentData,
 } from "firebase/firestore";
-import { db } from "../firebase";
+import { db } from "../../firebase";
 import { Course } from "../types/Course";
 
 const COURSES_PER_PAGE = 6;
