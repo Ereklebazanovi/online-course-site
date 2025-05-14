@@ -84,20 +84,36 @@ export const useCourseContent = (
     return () => unsubscribe();
   }, [courseId]);
 
-  // ✅ Fetch VdoCipher OTP using deployed Vercel function
+  // ✅ Secure OTP fetch for local and production
   useEffect(() => {
     const fetchOtp = async () => {
       if (!selectedLesson?.videoId || (!enrolled && !selectedLesson.isPreview)) return;
-      try {
-        const res = await fetch("/api/get-otp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ videoId: selectedLesson.videoId }),
-        });
 
-        const { otp, playbackInfo } = await res.json();
-        setOtp(otp);
-        setPlaybackInfo(playbackInfo);
+      try {
+        const isLocal = window.location.hostname === "localhost";
+
+        const res = await fetch(
+          isLocal
+            ? "https://online-course-site-eizz.vercel.app/api/get-otp"
+            : "/api/get-otp",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ videoId: selectedLesson.videoId }),
+          }
+        );
+
+        const text = await res.text();
+        try {
+          const { otp, playbackInfo } = JSON.parse(text);
+          setOtp(otp);
+          setPlaybackInfo(playbackInfo);
+        } catch (parseErr) {
+          console.error("Failed to parse OTP response:", text);
+          setError("Invalid OTP response from server.");
+          setOtp(null);
+          setPlaybackInfo(null);
+        }
       } catch (err) {
         console.error("Failed to fetch OTP", err);
         setOtp(null);
