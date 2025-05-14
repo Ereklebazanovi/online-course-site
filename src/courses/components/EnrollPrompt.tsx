@@ -7,7 +7,8 @@ interface Props {
   user: any;
   onEnroll: () => void;
 }
-//comment
+//comment everything out
+//         <div className="bg-gray-200 animate-pulse h-full rounded-xl" />
 const EnrollPrompt: FC<Props> = ({ enrolled, user, onEnroll }) => {
   if (enrolled) return null;
 
