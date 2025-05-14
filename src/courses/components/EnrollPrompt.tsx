@@ -7,7 +7,7 @@ interface Props {
   user: any;
   onEnroll: () => void;
 }
-
+//comment
 const EnrollPrompt: FC<Props> = ({ enrolled, user, onEnroll }) => {
   if (enrolled) return null;
 
