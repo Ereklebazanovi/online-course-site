@@ -55,13 +55,15 @@ const LoginModal: FC<LoginModalProps> = ({ open, onClose, redirectTo }) => {
         });
       }
 
-      dispatch(
-        setUser({
-          uid: userCred.user.uid,
-          email: userCred.user.email,
-          isEmailVerified: true,
-        })
-      );
+    dispatch(
+  setUser({
+    uid: userCred.user.uid,
+    email: userCred.user.email,
+    isEmailVerified: true,
+    isAdmin: false, // or fetch real admin status if needed
+  })
+);
+
 
       onClose();
       navigate(redirectTo || "/");
