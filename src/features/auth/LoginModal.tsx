@@ -55,15 +55,14 @@ const LoginModal: FC<LoginModalProps> = ({ open, onClose, redirectTo }) => {
         });
       }
 
-    dispatch(
-  setUser({
-    uid: userCred.user.uid,
-    email: userCred.user.email,
-    isEmailVerified: true,
-    isAdmin: false, // or fetch real admin status if needed
-  })
-);
-
+      dispatch(
+        setUser({
+          uid: userCred.user.uid,
+          email: userCred.user.email,
+          isEmailVerified: true,
+          isAdmin: false, // or fetch real admin status if needed
+        })
+      );
 
       onClose();
       navigate(redirectTo || "/");
@@ -127,12 +126,12 @@ const LoginModal: FC<LoginModalProps> = ({ open, onClose, redirectTo }) => {
 
         {error && (
           <Alert
-            message={error || ""}
+            message={error || "An error occurred"} // ✅ ensure string type
             type="error"
             showIcon
             className="mb-4"
             action={
-              error.includes("verify") && (
+              error?.includes("verify") && (
                 <Button
                   size="small"
                   type="link"
