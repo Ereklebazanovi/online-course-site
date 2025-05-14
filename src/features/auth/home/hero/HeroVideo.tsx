@@ -5,6 +5,7 @@ const VIDEO_ID = "271da1d30e6662341409aa73fb9ac1e5"; // Replace with your real v
 const HeroVideo = () => {
   const [otp, setOtp] = useState("");
   const [playbackInfo, setPlaybackInfo] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOtp = async () => {
@@ -16,15 +17,26 @@ const HeroVideo = () => {
         });
 
         const data = await response.json();
-        setOtp(data.otp);
-        setPlaybackInfo(data.playbackInfo);
-      } catch (error) {
-        console.error("Failed to fetch OTP:", error);
+        console.log("OTP API response:", data);
+
+        if (data.otp && data.playbackInfo) {
+          setOtp(data.otp);
+          setPlaybackInfo(data.playbackInfo);
+        } else {
+          setError("Invalid OTP response from server.");
+        }
+      } catch (err) {
+        console.error("Failed to fetch OTP:", err);
+        setError("Could not load secure video. Please try again.");
       }
     };
 
     fetchOtp();
   }, []);
+
+  if (error) {
+    return <p className="text-center p-4 text-red-500">{error}</p>;
+  }
 
   if (!otp || !playbackInfo) {
     return <p className="text-center p-4">Loading secure video...</p>;
@@ -48,6 +60,7 @@ const HeroVideo = () => {
 };
 
 export default HeroVideo;
+
 
 
 // import { useEffect, useState } from "react";
