@@ -1,10 +1,11 @@
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*"); // ✅ Allow requests from localhost
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    // ✅ Manually parse body (Vercel sometimes doesn't do it for us)
     const buffers = [];
     for await (const chunk of req) {
       buffers.push(chunk);
@@ -38,7 +39,6 @@ export default async function handler(req, res) {
         playbackInfo: data.playbackInfo,
       });
     } else {
-      console.error("Unexpected VdoCipher response:", data);
       return res
         .status(500)
         .json({ error: "OTP fetch failed", details: data });

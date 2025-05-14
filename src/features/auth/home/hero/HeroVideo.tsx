@@ -6,15 +6,21 @@ const HeroVideo = () => {
   const [otp, setOtp] = useState("");
   const [playbackInfo, setPlaybackInfo] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const isLocal = window.location.hostname === "localhost";
 
   useEffect(() => {
     const fetchOtp = async () => {
       try {
-        const response = await fetch("/api/get-otp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ videoId: VIDEO_ID }),
-        });
+        const response = await fetch(
+          isLocal
+            ? "https://online-course-site-eizz.vercel.app/api/get-otp"
+            : "/api/get-otp",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ videoId: VIDEO_ID }),
+          }
+        );
 
         const data = await response.json();
         console.log("OTP API response:", data);
@@ -61,11 +67,9 @@ const HeroVideo = () => {
 
 export default HeroVideo;
 
-
-
 // import { useEffect, useState } from "react";
 
-// const VIDEO_ID = "271da1d30e6662341409aa73fb9ac1e5"; 
+// const VIDEO_ID = "271da1d30e6662341409aa73fb9ac1e5";
 
 // const HeroVideo = () => {
 //   const [otp, setOtp] = useState("");
