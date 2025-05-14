@@ -68,7 +68,6 @@ const LoginModal: FC<LoginModalProps> = ({ open, onClose, redirectTo }) => {
     } catch (err: unknown) {
       let msg = "Login failed. Please try again.";
 
-      // ✅ Narrowing logic
       if (
         typeof err === "object" &&
         err !== null &&
@@ -116,76 +115,74 @@ const LoginModal: FC<LoginModalProps> = ({ open, onClose, redirectTo }) => {
       width={500}
       destroyOnClose
     >
-      <>
-        <div className="px-6 py-6">
-          <Title level={3} className="text-center mb-1">
-            Log in to Your Account
-          </Title>
-          <Text type="secondary" className="block text-center mb-5">
-            Access your enrolled courses, progress, and certificates.
-          </Text>
+      <div className="px-6 py-6">
+        <Title level={3} className="text-center mb-1">
+          Log in to Your Account
+        </Title>
+        <Text type="secondary" className="block text-center mb-5">
+          Access your enrolled courses, progress, and certificates.
+        </Text>
 
-          {error && (
-            <Alert
-              message={error}
-              type="error"
-              showIcon
-              className="mb-4"
-              action={
-                error.includes("verify") && (
-                  <Button
-                    size="small"
-                    type="link"
-                    onClick={handleResendVerification}
-                  >
-                    Resend Email
-                  </Button>
-                )
-              }
-            />
-          )}
+        {error && (
+          <Alert
+            message={error || ""}
+            type="error"
+            showIcon
+            className="mb-4"
+            action={
+              error.includes("verify") && (
+                <Button
+                  size="small"
+                  type="link"
+                  onClick={handleResendVerification}
+                >
+                  Resend Email
+                </Button>
+              )
+            }
+          />
+        )}
 
-          {info && (
-            <div className="mb-4">
-              <Alert message={info} type="success" showIcon />
-            </div>
-          )}
+        {info && (
+          <div className="mb-4">
+            <Alert message={info || ""} type="success" showIcon />
+          </div>
+        )}
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit();
-            }}
-          >
-            <div className="flex flex-col gap-4">
-              <Input
-                placeholder="Email Address"
-                type="email"
-                value={email}
-                size="large"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input.Password
-                placeholder="Password"
-                value={password}
-                size="large"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <Button
-              htmlType="submit"
-              type="primary"
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+        >
+          <div className="flex flex-col gap-4">
+            <Input
+              placeholder="Email Address"
+              type="email"
+              value={email}
               size="large"
-              block
-              loading={loading}
-              className="mt-6 bg-blue-600 hover:bg-blue-700 border-none"
-            >
-              Login
-            </Button>
-          </form>
-        </div>
-      </>
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Input.Password
+              placeholder="Password"
+              value={password}
+              size="large"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <Button
+            htmlType="submit"
+            type="primary"
+            size="large"
+            block
+            loading={loading}
+            className="mt-6 bg-blue-600 hover:bg-blue-700 border-none"
+          >
+            Login
+          </Button>
+        </form>
+      </div>
     </Modal>
   );
 };

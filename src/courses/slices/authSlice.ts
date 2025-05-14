@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-//User ეწერა signOut ის მერე
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 
@@ -25,17 +24,22 @@ const initialState: UserState = {
 };
 
 // Async thunk: login
-export const loginWithEmail = createAsyncThunk(
+export const loginWithEmail = createAsyncThunk<
+  {
+    uid: string;
+    email: string | null;
+    isEmailVerified: boolean;
+    isAdmin: boolean;
+  },
+  { email: string; password: string },
+  { rejectValue: string }
+>(
   "auth/loginWithEmail",
-  async (
-    { email, password }: { email: string; password: string },
-    thunkAPI
-  ) => {
+  async ({ email, password }, thunkAPI) => {
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
       const user = userCred.user;
 
-      // Check for admin status in Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
       const isAdmin = userDoc.exists()
         ? userDoc.data().isAdmin === true
@@ -48,20 +52,19 @@ export const loginWithEmail = createAsyncThunk(
         isAdmin,
       };
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error?.message || "Login failed");
     }
   }
 );
 
 // Async thunk: logout
-export const logoutUser = createAsyncThunk(
+export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
   "auth/logoutUser",
   async (_, thunkAPI) => {
     try {
       await signOut(auth);
-      return;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error?.message || "Logout failed");
     }
   }
 );
@@ -75,7 +78,7 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{
         uid: string;
-        email: string;
+        email: string | null;
         isEmailVerified: boolean;
         isAdmin: boolean;
       }>
@@ -107,7 +110,7 @@ const authSlice = createSlice({
       })
       .addCase(loginWithEmail.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload ?? "Login failed";
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.uid = null;
@@ -116,7 +119,7 @@ const authSlice = createSlice({
         state.isAdmin = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
-        state.error = action.payload as string;
+        state.error = action.payload ?? "Logout failed";
       });
   },
 });
