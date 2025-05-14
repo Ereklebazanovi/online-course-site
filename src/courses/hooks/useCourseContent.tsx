@@ -84,16 +84,17 @@ export const useCourseContent = (
     return () => unsubscribe();
   }, [courseId]);
 
+  // ✅ Fetch VdoCipher OTP using deployed Vercel function
   useEffect(() => {
     const fetchOtp = async () => {
-      if (!selectedLesson?.videoId || (!enrolled && !selectedLesson.isPreview))
-        return;
+      if (!selectedLesson?.videoId || (!enrolled && !selectedLesson.isPreview)) return;
       try {
-        const res = await fetch("http://localhost:4000/get-otp", {
+        const res = await fetch("/api/get-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ videoId: selectedLesson.videoId }),
         });
+
         const { otp, playbackInfo } = await res.json();
         setOtp(otp);
         setPlaybackInfo(playbackInfo);
@@ -143,13 +144,12 @@ export const useCourseContent = (
     }
   };
 
-  // ✅ Next & Previous Navigation
   const currentIndex = lessons.findIndex((l) => l.id === selectedLesson?.id);
   const nextLesson = lessons.find(
     (_, index) => index > currentIndex && (enrolled || lessons[index].isPreview)
   );
   const prevLesson = lessons
-    .slice(0, currentIndex) // get all lessons before current
+    .slice(0, currentIndex)
     .reverse()
     .find((lesson) => enrolled || lesson.isPreview);
 
@@ -167,6 +167,6 @@ export const useCourseContent = (
     handleEnroll,
     nextLesson,
     prevLesson,
-    onLessonSelect: setSelectedLesson, // optional alias
+    onLessonSelect: setSelectedLesson,
   };
 };

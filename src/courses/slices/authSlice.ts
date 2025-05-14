@@ -1,7 +1,6 @@
-
-
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { signInWithEmailAndPassword, signOut, User } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+//User ეწერა signOut ის მერე
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 
@@ -38,7 +37,9 @@ export const loginWithEmail = createAsyncThunk(
 
       // Check for admin status in Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
-      const isAdmin = userDoc.exists() ? userDoc.data().isAdmin === true : false;
+      const isAdmin = userDoc.exists()
+        ? userDoc.data().isAdmin === true
+        : false;
 
       return {
         uid: user.uid,
@@ -53,14 +54,17 @@ export const loginWithEmail = createAsyncThunk(
 );
 
 // Async thunk: logout
-export const logoutUser = createAsyncThunk("auth/logoutUser", async (_, thunkAPI) => {
-  try {
-    await signOut(auth);
-    return;
-  } catch (error: any) {
-    return thunkAPI.rejectWithValue(error.message);
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, thunkAPI) => {
+    try {
+      await signOut(auth);
+      return;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
   }
-});
+);
 
 // Slice
 const authSlice = createSlice({

@@ -39,21 +39,26 @@ const CourseVideoPlayer: FC<Props> = ({
     );
   }
 
+  const videoUrl =
+    otp && playbackInfo
+      ? `https://player.vdocipher.com/v2/?otp=${encodeURIComponent(
+          otp
+        )}&playbackInfo=${encodeURIComponent(playbackInfo)}`
+      : null;
+
   return (
     <div className="space-y-4">
-      <div className="aspect-video rounded-xl overflow-hidden shadow">
-        {otp && playbackInfo ? (
+      <div className="aspect-video rounded-xl overflow-hidden shadow relative">
+        {videoUrl ? (
           <iframe
-            src={`https://player.vdocipher.com/v2/?otp=${encodeURIComponent(
-              otp
-            )}&playbackInfo=${encodeURIComponent(playbackInfo)}`}
+            src={videoUrl}
             allow="encrypted-media"
             allowFullScreen
             className="w-full h-full border-0"
             title={title}
           />
         ) : (
-          <div className="flex items-center justify-center w-full h-full bg-gray-100 text-gray-500 text-sm">
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 text-sm">
             Loading secure video...
           </div>
         )}
