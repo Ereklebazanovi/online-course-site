@@ -15,7 +15,7 @@
 // HeroVideo.tsx
 import { useEffect, useState } from "react";
 
-const VIDEO_ID = "d72d92b13d7b46ac96858c117d5c31a9"; // e.g., d72d92b13d7b46ac...
+const VIDEO_ID = "d72d92b13d7b46ac96858c117d5c31a9"; 
 
 const HeroVideo = () => {
   const [otp, setOtp] = useState("");

@@ -1,8 +1,11 @@
-// import { signOut } from "firebase/auth";
-// import { auth } from "../../firebase";
-// import { useDispatch } from "react-redux";
-// import { clearUser } from "./authSlice";
-// import { useNavigate } from "react-router-dom";
+
+
+
+// import { signOut } from 'firebase/auth';
+// import { auth } from '../../firebase';
+// import { useDispatch } from 'react-redux';
+// import { clearUser } from './authSlice';
+// import { useNavigate } from 'react-router-dom';
 
 // export default function LogoutButton() {
 //   const dispatch = useDispatch();
@@ -12,10 +15,10 @@
 //     try {
 //       await signOut(auth);
 //       dispatch(clearUser());
-//       navigate("/login");
+//       navigate('/login');
 //     } catch (err) {
-//       console.error("Logout failed:", err);
-//       alert("Failed to log out. Please try again.");
+//       console.error('Logout failed:', err);
+//       alert('Failed to log out. Please try again.');
 //     }
 //   };
 
@@ -25,27 +28,24 @@
 //     </button>
 //   );
 // }
-/////axali
 
 
-import { signOut } from 'firebase/auth';
-import { auth } from '../../firebase';
-import { useDispatch } from 'react-redux';
-import { clearUser } from './authSlice';
-import { useNavigate } from 'react-router-dom';
+
+
+import { useAppDispatch } from "../../app/hooks";
+import { logoutUser } from "./authSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function LogoutButton() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      dispatch(clearUser());
-      navigate('/login');
+      await dispatch(logoutUser()).unwrap();
+      navigate("/login");
     } catch (err) {
-      console.error('Logout failed:', err);
-      alert('Failed to log out. Please try again.');
+      alert("Failed to logout. Try again.");
     }
   };
 
