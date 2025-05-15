@@ -1,5 +1,5 @@
 export const config = {
-  runtime: 'edge',
+  runtime: "edge",
 };
 
 const LIBRARY_ID = "425843";
@@ -14,7 +14,6 @@ export default async function handler(req: Request): Promise<Response> {
       });
     }
 
-    // ✅ Correct way to parse JSON from Edge API request
     const { videoId } = await req.json();
 
     if (!videoId) {
@@ -53,8 +52,8 @@ export default async function handler(req: Request): Promise<Response> {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error("🔥 ERROR in token API:", err);
+  } catch (err: any) {
+    console.error("🔥 API ERROR:", err.message || err);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
