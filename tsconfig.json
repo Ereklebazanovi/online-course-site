@@ -3,19 +3,19 @@
     "target": "ES2020",
     "module": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "allowJs": true,
+    "allowJs": false,                     // ✅ Usually better to keep .js out if you're using TS
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "strict": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",                   // ✅ 'react-jsx' is optimal for Vite + React 17+
     "incremental": true,
     "plugins": []
   },
-  "include": ["**/*.ts", "**/*.tsx", "api", "src", ".next/types/**/*.ts"],
+  "include": ["src", "api", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "dist"]
 }
