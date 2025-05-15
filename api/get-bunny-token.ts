@@ -14,7 +14,8 @@ export default async function handler(req: Request): Promise<Response> {
       });
     }
 
-    const { videoId } = await req.json();
+    const body = await req.text(); // FIX ✅
+    const { videoId } = JSON.parse(body); // FIX ✅
 
     if (!videoId) {
       return new Response(JSON.stringify({ error: 'Missing videoId' }), {
