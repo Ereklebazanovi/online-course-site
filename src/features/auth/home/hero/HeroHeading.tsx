@@ -3,7 +3,7 @@ import { FC } from "react";
 interface Props {
   user: any;
 }
-
+//comment
 const HeroHeading: FC<Props> = ({ user }) => (
   <>
     <span className="inline-block px-4 py-1 rounded-full bg-blue-800 bg-opacity-70 text-blue-100 text-sm font-semibold mb-6 tracking-wide shadow-sm">
