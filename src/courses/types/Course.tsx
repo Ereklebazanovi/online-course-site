@@ -23,7 +23,7 @@ export interface Course {
 
   // 🔒 New: VdoCipher ID replaces YouTube URL
   videoId?: string; // VdoCipher video reference
-videoUrl?: string; // YouTube URL for legacy support
+// videoUrl?: string; // YouTube URL for legacy support
   teacherName: string;
   category: string;
   createdAt: string;

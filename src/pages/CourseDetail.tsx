@@ -112,12 +112,12 @@ const CourseDetail = () => {
 
             {/* Right - Teaser Video */}
             <div className="relative w-full rounded-xl overflow-hidden shadow-md aspect-video">
-              {course.videoUrl && course.videoUrl.includes("youtube.com") ? (
+              {course.videoId ? (
                 <iframe
-                  src={course.videoUrl.replace("watch?v=", "embed/")}
+                  src={`https://player.vdocipher.com/v2/?otp=FETCHED_OTP&playbackInfo=FETCHED_INFO`}
                   title={course.title}
                   allowFullScreen
-                  className="absolute top-0 left-0 w-full h-full"
+                  className="absolute top-0 left-0 w-full h-full border-0"
                 />
               ) : (
                 <img
