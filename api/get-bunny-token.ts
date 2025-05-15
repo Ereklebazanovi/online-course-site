@@ -14,12 +14,12 @@ export default async function handler(req: Request): Promise<Response> {
       });
     }
 
-    // ✅ Safe JSON parse in Edge runtime
-    let body: any;
+    // ✅ SAFELY PARSE BODY
+    let body: any = {};
     try {
       body = await new Response(req.body).json();
-    } catch (err) {
-      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+    } catch (e) {
+      return new Response(JSON.stringify({ error: 'Invalid JSON input' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -63,7 +63,6 @@ export default async function handler(req: Request): Promise<Response> {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-
   } catch (err: any) {
     console.error('🔥 FINAL ERROR:', err.message || err);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
