@@ -14,7 +14,7 @@ export default async function handler(req: Request): Promise<Response> {
       });
     }
 
-    const body = await req.json(); // <-- This line can fail if body is empty
+    const body = await req.json();
     const { videoId } = body;
 
     if (!videoId) {
@@ -54,8 +54,8 @@ export default async function handler(req: Request): Promise<Response> {
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("🔥 API ERROR:", err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    console.error("🔥 ERROR in token API:", err);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
