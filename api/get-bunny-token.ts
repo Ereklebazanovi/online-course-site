@@ -1,53 +1,63 @@
-// File: /api/get-bunny-token.ts
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import crypto from 'crypto';
+export const config = {
+  runtime: 'edge',
+};
 
 const BUNNY_API_KEY = process.env.BUNNY_STREAM_API_KEY!;
 const LIBRARY_ID = "425843";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
+export default async function handler(req: Request): Promise<Response> {
   try {
-    // ✅ Fix: req.body might be undefined, so we handle manually
-    const buffers = [];
-    for await (const chunk of req) {
-      buffers.push(chunk);
+    if (req.method !== "POST") {
+      return new Response(JSON.stringify({ error: "Method not allowed" }), {
+        status: 405,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-    const rawBody = Buffer.concat(buffers).toString();
-    const body = JSON.parse(rawBody);
 
+    const body = await req.json(); // <-- This line can fail if body is empty
     const { videoId } = body;
 
     if (!videoId) {
-      return res.status(400).json({ error: "Missing videoId" });
+      return new Response(JSON.stringify({ error: "Missing videoId" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const expires = Math.floor(Date.now() / 1000) + 60;
     const path = `/${LIBRARY_ID}/${videoId}`;
-    const token = crypto
-      .createHmac("sha256", BUNNY_API_KEY)
-      .update(path + expires)
-      .digest("base64")
+
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(BUNNY_API_KEY),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const signature = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      encoder.encode(path + expires)
+    );
+
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
       .replace(/\+/g, "-")
       .replace(/\//g, "_")
       .replace(/=+$/, "");
 
-    const signedUrl = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?token=${token}&expires=${expires}`;
+    const signedUrl = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?token=${base64}&expires=${expires}`;
 
-    return res.status(200).json({ signedUrl });
+    return new Response(JSON.stringify({ signedUrl }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (err) {
-    console.error("Error in token handler:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("🔥 API ERROR:", err);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
