@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "Node16",
+    "module": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "moduleResolution": "node16", // ✅ FIXED: important for Tailwind + Vite
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
