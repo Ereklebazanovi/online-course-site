@@ -89,7 +89,6 @@
 
 // export default CourseVideoPlayer;
 
-
 import { FC, useEffect, useState } from "react";
 import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Button } from "antd";
@@ -130,8 +129,18 @@ const CourseVideoPlayer: FC<Props> = ({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ videoId: bunnyVideoId }),
         });
+const text = await res.text();
+console.log("🔁 Raw response text:", text);
 
-        const data = await res.json();
+let data;
+try {
+  data = JSON.parse(text);
+} catch (err) {
+  console.error("❌ Failed to parse JSON:", err);
+  setError("Invalid response from server");
+  return;
+}
+
 
         if (data?.signedUrl) {
           setSignedUrl(data.signedUrl);
@@ -148,7 +157,9 @@ const CourseVideoPlayer: FC<Props> = ({
   }, [bunnyVideoId, isLocked]);
 
   if (switching) {
-    return <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />;
+    return (
+      <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />
+    );
   }
 
   if (isLocked) {
