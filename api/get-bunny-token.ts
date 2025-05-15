@@ -1,5 +1,5 @@
 export const config = {
-  runtime: 'edge',
+  runtime: 'edge', // edge function enabled
 };
 
 const LIBRARY_ID = '425843';
@@ -14,12 +14,14 @@ export default async function handler(req: Request): Promise<Response> {
       });
     }
 
-    // ✅ SAFELY PARSE BODY
-    let body: any = {};
+    // ✅ FIX: Use .text() in edge function, then parse manually
+    const rawText = await req.text();
+
+    let body: any;
     try {
-      body = await new Response(req.body).json();
-    } catch (e) {
-      return new Response(JSON.stringify({ error: 'Invalid JSON input' }), {
+      body = JSON.parse(rawText);
+    } catch (error) {
+      return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
