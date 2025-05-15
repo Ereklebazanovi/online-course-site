@@ -14,8 +14,9 @@ export default async function handler(req: Request): Promise<Response> {
       });
     }
 
-    const body = await req.text(); // FIX ✅
-    const { videoId } = JSON.parse(body); // FIX ✅
+    // 🔥 FIX: Use .json() only if it's a native Fetch Request object
+    const body = await req.json(); // This should now work (if not, fall back to manual)
+    const { videoId } = body;
 
     if (!videoId) {
       return new Response(JSON.stringify({ error: 'Missing videoId' }), {
@@ -53,6 +54,7 @@ export default async function handler(req: Request): Promise<Response> {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
+
   } catch (err: any) {
     console.error('🔥 FINAL ERROR:', err.message || err);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
