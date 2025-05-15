@@ -121,37 +121,37 @@ const CourseVideoPlayer: FC<Props> = ({
 
   useEffect(() => {
     const fetchSignedUrl = async () => {
-      if (!bunnyVideoId || isLocked) return;
+  if (!bunnyVideoId || isLocked) return;
 
-      try {
-        const res = await fetch("/api/get-bunny-token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ videoId: bunnyVideoId }),
-        });
-const text = await res.text();
-console.log("🔁 Raw response text:", text);
+  try {
+    const res = await fetch("/api/get-bunny-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ videoId: bunnyVideoId }),
+    });
 
-let data;
-try {
-  data = JSON.parse(text);
-} catch (err) {
-  console.error("❌ Failed to parse JSON:", err);
-  setError("Invalid response from server");
-  return;
-}
+    const text = await res.text();
+    let data;
 
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      console.error("❌ Failed to parse JSON:", err);
+      setError("Invalid response from server");
+      return;
+    }
 
-        if (data?.signedUrl) {
-          setSignedUrl(data.signedUrl);
-        } else {
-          setError("Failed to load secure video.");
-        }
-      } catch (err) {
-        console.error("Signed URL error", err);
-        setError("Something went wrong loading the video.");
-      }
-    };
+    if (data?.signedUrl) {
+      setSignedUrl(data.signedUrl);
+    } else {
+      setError("Failed to load secure video.");
+    }
+  } catch (err) {
+    console.error("Signed URL error", err);
+    setError("Something went wrong loading the video.");
+  }
+};
+
 
     fetchSignedUrl();
   }, [bunnyVideoId, isLocked]);

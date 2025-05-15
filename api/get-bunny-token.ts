@@ -14,8 +14,17 @@ export default async function handler(req: Request): Promise<Response> {
       });
     }
 
-    // 🔥 FIX: Use .json() only if it's a native Fetch Request object
-    const body = await req.json(); // This should now work (if not, fall back to manual)
+    // ✅ Safe JSON parse in Edge runtime
+    let body: any;
+    try {
+      body = await new Response(req.body).json();
+    } catch (err) {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const { videoId } = body;
 
     if (!videoId) {
