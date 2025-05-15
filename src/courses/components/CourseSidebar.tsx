@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { LockOutlined, PlayCircleOutlined } from "@ant-design/icons";
 
-import { Lesson } from "../types/Course";
+import { Lesson } from "../types/Lesson";
 
 interface Props {
   lessons: Lesson[];

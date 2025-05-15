@@ -9,6 +9,7 @@
 // import CourseVideoPlayer from "../components/CourseVideoPlayer";
 // import EnrollPrompt from "../components/EnrollPrompt";
 // import { Lesson } from "../types/Course";
+
 // const CourseContent = () => {
 //   const { courseId } = useParams();
 //   const location = useLocation();
@@ -55,11 +56,11 @@
 //   const prevLesson =
 //     currentLessonIndex > 0 ? lessons[currentLessonIndex - 1] : null;
 
-//   function onLessonSelect(lesson: Lesson): void {
+//   const onLessonSelect = (lesson: Lesson): void => {
 //     if (lesson.id !== selectedLesson?.id) {
 //       handleLessonClick(lesson);
 //     }
-//   }
+//   };
 
 //   return (
 //     <div className="p-8">
@@ -108,6 +109,7 @@
 // export default CourseContent;
 
 
+//BUNNy
 import { useParams, useLocation } from "react-router-dom";
 import { getAuth } from "firebase/auth";
 import { Skeleton, Alert } from "antd";
@@ -116,7 +118,7 @@ import { useCourseContent } from "../hooks/useCourseContent";
 import CourseSidebar from "../components/CourseSidebar";
 import CourseVideoPlayer from "../components/CourseVideoPlayer";
 import EnrollPrompt from "../components/EnrollPrompt";
-import { Lesson } from "../types/Course";
+import { Lesson } from "../types/Lesson";
 
 const CourseContent = () => {
   const { courseId } = useParams();
@@ -131,8 +133,6 @@ const CourseContent = () => {
     lessons,
     selectedLesson,
     enrolled,
-    otp,
-    playbackInfo,
     switching,
     handleLessonClick,
     handleEnroll,
@@ -190,8 +190,8 @@ const CourseContent = () => {
 
                 <CourseVideoPlayer
                   title={selectedLesson.title}
-                  otp={otp}
-                  playbackInfo={playbackInfo}
+                 bunnyVideoId={selectedLesson.bunnyVideoId || undefined}
+
                   isLocked={!enrolled && !selectedLesson.isPreview}
                   switching={switching}
                   onNext={() => nextLesson && onLessonSelect(nextLesson)}

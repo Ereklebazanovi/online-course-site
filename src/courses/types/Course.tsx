@@ -1,19 +1,3 @@
-// export interface Course {
-//   id: string;
-//   title: string;
-//   description: string;
-//   price: number;
-//   thumbnailUrl: string;
-//   videoUrl?: string;
-//   teacherName: string;
-//   category: string;
-//   createdAt: Date;
-//   level?: string;
-// }
-
-
-// src/types/Course.ts
-
 export interface Course {
   id: string;
   title: string;
@@ -21,25 +5,15 @@ export interface Course {
   price: number;
   thumbnailUrl: string;
 
-  // 🔒 New: VdoCipher ID replaces YouTube URL
-  videoId?: string; // VdoCipher video reference
-// videoUrl?: string; // YouTube URL for legacy support
+  // 🔄 Replace or remove this if not using VdoCipher
+  videoId?: string;
+
+  // ✅ Add Bunny video support
+  bunnyVideoId?: string;
+
   teacherName: string;
   category: string;
   createdAt: string;
-
-  // 🔁 Optional fields for filtering or tagging
   level?: string;
-
-  // ✅ Optional preview flag
   isFree?: boolean;
-}
-
-
-export interface Lesson {
-  id: string;
-  title: string;
-  videoId: string;
-  isPreview?: boolean;
-  position?: number;
 }

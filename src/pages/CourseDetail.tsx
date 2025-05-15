@@ -1,4 +1,3 @@
-// CourseDetail.tsx
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
@@ -110,13 +109,14 @@ const CourseDetail = () => {
               </div>
             </div>
 
-            {/* Right - Teaser Video */}
+            {/* Right - Teaser Video or Thumbnail */}
             <div className="relative w-full rounded-xl overflow-hidden shadow-md aspect-video">
-              {course.videoId ? (
+              {course.bunnyVideoId ? (
                 <iframe
-                  src={`https://player.vdocipher.com/v2/?otp=FETCHED_OTP&playbackInfo=FETCHED_INFO`}
+                  src={`https://iframe.mediadelivery.net/embed/425843/${course.bunnyVideoId}?autoplay=false&loop=false&muted=false&preload=true&responsive=true`}
                   title={course.title}
                   allowFullScreen
+                  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                   className="absolute top-0 left-0 w-full h-full border-0"
                 />
               ) : (

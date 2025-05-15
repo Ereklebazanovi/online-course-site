@@ -12,7 +12,7 @@ import {
 import { Auth, User } from "firebase/auth";
 import { db } from "../../firebase";
 import { Location } from "react-router-dom";
-import { Lesson } from "../types/Course";
+import { Lesson } from "../types/Lesson";
 
 export const useCourseContent = (
   courseId: string,
@@ -27,8 +27,6 @@ export const useCourseContent = (
   const [switching, setSwitching] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
   const [error, setError] = useState("");
-  const [otp, setOtp] = useState<string | null>(null);
-  const [playbackInfo, setPlaybackInfo] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (u: User | null) => {
@@ -74,7 +72,7 @@ export const useCourseContent = (
           }
         }
       } catch (err) {
-        console.error("Error:", err);
+        console.error("Error loading course:", err);
         setError("Failed to load course.");
       } finally {
         setLoading(false);
@@ -83,46 +81,6 @@ export const useCourseContent = (
 
     return () => unsubscribe();
   }, [courseId]);
-
-  // ✅ Secure OTP fetch for local and production
-  useEffect(() => {
-    const fetchOtp = async () => {
-      if (!selectedLesson?.videoId || (!enrolled && !selectedLesson.isPreview)) return;
-
-      try {
-        const isLocal = window.location.hostname === "localhost";
-
-        const res = await fetch(
-          isLocal
-            ? "https://online-course-site-eizz.vercel.app/api/get-otp"
-            : "/api/get-otp",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ videoId: selectedLesson.videoId }),
-          }
-        );
-
-        const text = await res.text();
-        try {
-          const { otp, playbackInfo } = JSON.parse(text);
-          setOtp(otp);
-          setPlaybackInfo(playbackInfo);
-        } catch (parseErr) {
-          console.error("Failed to parse OTP response:", text);
-          setError("Invalid OTP response from server.");
-          setOtp(null);
-          setPlaybackInfo(null);
-        }
-      } catch (err) {
-        console.error("Failed to fetch OTP", err);
-        setOtp(null);
-        setPlaybackInfo(null);
-      }
-    };
-
-    fetchOtp();
-  }, [selectedLesson, enrolled]);
 
   const handleLessonClick = (lesson: Lesson) => {
     const isAccessible = enrolled || lesson.isPreview;
@@ -176,8 +134,6 @@ export const useCourseContent = (
     lessons,
     selectedLesson,
     enrolled,
-    otp,
-    playbackInfo,
     switching,
     handleLessonClick,
     handleEnroll,
