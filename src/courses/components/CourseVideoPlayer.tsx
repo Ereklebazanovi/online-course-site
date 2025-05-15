@@ -31,31 +31,42 @@ const CourseVideoPlayer: FC<Props> = ({
       if (!bunnyVideoId || isLocked) return;
 
       try {
-        const res = await fetch("/api/get-bunny-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ videoId: bunnyVideoId }),
-        });
+        let signedUrl: string | null = null;
 
-        const text = await res.text();
-        console.log("🔁 Raw response text:", text);
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (err) {
-          console.error("❌ Failed to parse JSON:", err);
-          setError("Invalid response from server");
-          return;
-        }
-
-        if (data?.signedUrl) {
-          setSignedUrl(data.signedUrl);
+        // 👇 In local dev mode, return a dummy signed URL
+        if (import.meta.env.DEV) {
+          const expires = Math.floor(Date.now() / 1000) + 60;
+          signedUrl = `https://iframe.mediadelivery.net/embed/425843/${bunnyVideoId}?token=dev-debug-token&expires=${expires}`;
         } else {
-          setError("Failed to load secure video.");
+          const res = await fetch("/api/get-bunny-token", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ videoId: bunnyVideoId }),
+          });
+
+          const text = await res.text();
+          console.log("🔁 Raw response text:", text);
+
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch (err) {
+            console.error("❌ Failed to parse JSON:", err);
+            setError("Invalid response from server");
+            return;
+          }
+
+          if (data?.signedUrl) {
+            signedUrl = data.signedUrl;
+          } else {
+            setError("Failed to load secure video.");
+            return;
+          }
         }
+
+        setSignedUrl(signedUrl);
       } catch (err) {
         console.error("Signed URL error", err);
         setError("Something went wrong loading the video.");
