@@ -2,9 +2,8 @@ export const config = {
   runtime: 'edge',
 };
 
-const BUNNY_API_KEY = process.env.BUNNY_STREAM_API_KEY!;
 const LIBRARY_ID = "425843";
-console.log("🐰 ENV KEY:", BUNNY_API_KEY);
+const BUNNY_API_KEY = process.env.BUNNY_STREAM_API_KEY!;
 
 export default async function handler(req: Request): Promise<Response> {
   try {
@@ -15,8 +14,8 @@ export default async function handler(req: Request): Promise<Response> {
       });
     }
 
-    const body = await req.json();
-    const { videoId } = body;
+    // ✅ Correct way to parse JSON from Edge API request
+    const { videoId } = await req.json();
 
     if (!videoId) {
       return new Response(JSON.stringify({ error: "Missing videoId" }), {
