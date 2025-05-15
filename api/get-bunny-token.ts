@@ -25,7 +25,7 @@ export default async function handler(req: Request): Promise<Response> {
 
     const expires = Math.floor(Date.now() / 1000) + 60;
     const path = `/${LIBRARY_ID}/${videoId}`;
-
+//ere
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
       "raw",
