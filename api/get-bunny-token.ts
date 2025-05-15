@@ -4,6 +4,7 @@ export const config = {
 
 const BUNNY_API_KEY = process.env.BUNNY_STREAM_API_KEY!;
 const LIBRARY_ID = "425843";
+console.log("🐰 ENV KEY:", BUNNY_API_KEY);
 
 export default async function handler(req: Request): Promise<Response> {
   try {
