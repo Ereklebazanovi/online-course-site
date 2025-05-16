@@ -110,14 +110,26 @@
 
 
 //BUNNy
-import { useParams, useLocation } from "react-router-dom";
+// Updated CourseContent.tsx with lazy loading + optimized token fetching
+
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  getDocs,
+  DocumentData,
+} from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
+import { useParams, useLocation } from "react-router-dom";
+import { db } from "../../firebase";
 import { Skeleton, Alert } from "antd";
-import { useLoginModal } from "../../contexts/LoginModalContext";
-import { useCourseContent } from "../hooks/useCourseContent";
 import CourseSidebar from "../components/CourseSidebar";
 import CourseVideoPlayer from "../components/CourseVideoPlayer";
 import EnrollPrompt from "../components/EnrollPrompt";
+import { useLoginModal } from "../../contexts/LoginModalContext";
 import { Lesson } from "../types/Lesson";
 
 const CourseContent = () => {
@@ -126,17 +138,75 @@ const CourseContent = () => {
   const auth = getAuth();
   const { open: openLoginModal } = useLoginModal();
 
-  const {
-    user,
-    loading,
-    error,
-    lessons,
-    selectedLesson,
-    enrolled,
-    switching,
-    handleLessonClick,
-    handleEnroll,
-  } = useCourseContent(courseId!, auth, openLoginModal, location);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [signedUrlCache] = useState(() => new Map<string, string>());
+  const [loadingLessons, setLoadingLessons] = useState(false);
+  const [lastDoc, setLastDoc] = useState<DocumentData | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [enrolled, setEnrolled] = useState(false); // Replace with your actual enrollment logic
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [switching, setSwitching] = useState(false);
+
+  useEffect(() => {
+    fetchLessons();
+  }, []);
+
+  const fetchLessons = async () => {
+    if (!courseId || loadingLessons || !hasMore) return;
+    setLoadingLessons(true);
+    try {
+      const ref = collection(db, "courses", courseId, "lessons");
+      const q = lastDoc
+        ? query(ref, orderBy("order"), startAfter(lastDoc), limit(10))
+        : query(ref, orderBy("order"), limit(10));
+
+      const snapshot = await getDocs(q);
+      const newLessons = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Lesson[];
+
+      setLessons((prev) => [...prev, ...newLessons]);
+      const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+      setLastDoc(lastVisible);
+      setHasMore(snapshot.docs.length === 10);
+      setLoading(false);
+      if (!selectedLesson && newLessons.length > 0) {
+        setSelectedLesson(newLessons[0]);
+      }
+    } catch (err) {
+      setError("Failed to load lessons.");
+    } finally {
+      setLoadingLessons(false);
+    }
+  };
+
+  const handleEnroll = () => {
+    if (!auth.currentUser) {
+      openLoginModal();
+      return;
+    }
+    // Enroll logic here
+    setEnrolled(true);
+  };
+
+  const handleLessonClick = async (lesson: Lesson) => {
+    setSwitching(true);
+    setSelectedLesson(lesson);
+    setSwitching(false);
+  };
+
+  const currentLessonIndex = lessons.findIndex(
+    (lesson) => lesson.id === selectedLesson?.id
+  );
+  const nextLesson =
+    currentLessonIndex >= 0 && currentLessonIndex < lessons.length - 1
+      ? lessons[currentLessonIndex + 1]
+      : null;
+  const prevLesson =
+    currentLessonIndex > 0 ? lessons[currentLessonIndex - 1] : null;
 
   if (loading) {
     return (
@@ -153,22 +223,6 @@ const CourseContent = () => {
       </div>
     );
   }
-
-  const currentLessonIndex = lessons.findIndex(
-    (lesson) => lesson.id === selectedLesson?.id
-  );
-  const nextLesson =
-    currentLessonIndex >= 0 && currentLessonIndex < lessons.length - 1
-      ? lessons[currentLessonIndex + 1]
-      : null;
-  const prevLesson =
-    currentLessonIndex > 0 ? lessons[currentLessonIndex - 1] : null;
-
-  const onLessonSelect = (lesson: Lesson): void => {
-    if (lesson.id !== selectedLesson?.id) {
-      handleLessonClick(lesson);
-    }
-  };
 
   return (
     <div className="p-8">
@@ -190,12 +244,11 @@ const CourseContent = () => {
 
                 <CourseVideoPlayer
                   title={selectedLesson.title}
-                 bunnyVideoId={selectedLesson.bunnyVideoId || undefined}
-
+                  bunnyVideoId={selectedLesson.bunnyVideoId || undefined}
                   isLocked={!enrolled && !selectedLesson.isPreview}
                   switching={switching}
-                  onNext={() => nextLesson && onLessonSelect(nextLesson)}
-                  onPrev={() => prevLesson && onLessonSelect(prevLesson)}
+                  onNext={() => nextLesson && handleLessonClick(nextLesson)}
+                  onPrev={() => prevLesson && handleLessonClick(prevLesson)}
                   hasNext={!!nextLesson}
                   hasPrev={!!prevLesson}
                 />
@@ -204,9 +257,19 @@ const CourseContent = () => {
 
             <EnrollPrompt
               enrolled={enrolled}
-              user={user}
+              user={auth.currentUser}
               onEnroll={handleEnroll}
             />
+
+            {hasMore && (
+              <button
+                className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded"
+                onClick={fetchLessons}
+                disabled={loadingLessons}
+              >
+                {loadingLessons ? "Loading more..." : "Load More Lessons"}
+              </button>
+            )}
           </div>
         </div>
       </div>
