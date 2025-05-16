@@ -1,7 +1,7 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useState, useRef } from "react";
 import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Button } from "antd";
-import { getSignedUrl, setSignedUrl } from "../../utils/videoCache";
+import signedUrlCache from "../../utils/videoCache";
 
 interface Props {
   title: string;
@@ -14,6 +14,8 @@ interface Props {
   bunnyVideoId?: string;
 }
 
+const ongoingFetches = new Set<string>(); // ✅ lock map
+
 const CourseVideoPlayer: FC<Props> = ({
   title,
   isLocked,
@@ -24,24 +26,22 @@ const CourseVideoPlayer: FC<Props> = ({
   hasPrev,
   bunnyVideoId,
 }) => {
-  const [signedUrl, setSignedUrlState] = useState<string | null>(null);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const isFetchingRef = useRef<Set<string>>(new Set());
-  const isMounted = useRef(true);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
-    isMounted.current = true;
+    isMountedRef.current = true;
 
     if (!bunnyVideoId || isLocked) return;
 
-    const cached = getSignedUrl(bunnyVideoId);
-    if (cached) {
-      setSignedUrlState(cached);
+    if (signedUrlCache.has(bunnyVideoId)) {
+      setSignedUrl(signedUrlCache.get(bunnyVideoId)!);
       return;
     }
 
-    if (isFetchingRef.current.has(bunnyVideoId)) return;
-    isFetchingRef.current.add(bunnyVideoId);
+    if (ongoingFetches.has(bunnyVideoId)) return;
+    ongoingFetches.add(bunnyVideoId);
 
     const fetchSignedUrl = async () => {
       try {
@@ -51,25 +51,28 @@ const CourseVideoPlayer: FC<Props> = ({
           body: JSON.stringify({ videoId: bunnyVideoId }),
         });
 
-        const data = await res.json();
+        const { signedUrl } = await res.json();
 
-        if (isMounted.current && data?.signedUrl) {
-          setSignedUrl(bunnyVideoId, data.signedUrl);
-          setSignedUrlState(data.signedUrl);
-        } else if (isMounted.current) {
-          setError("Secure video could not be loaded.");
+        if (isMountedRef.current && signedUrl) {
+          signedUrlCache.set(bunnyVideoId, signedUrl);
+          setSignedUrl(signedUrl);
+        } else if (isMountedRef.current) {
+          setError("Could not load secure video.");
         }
       } catch (err) {
         console.error("❌ Fetch error:", err);
-        if (isMounted.current)
+        if (isMountedRef.current) {
           setError("Something went wrong loading the video.");
+        }
+      } finally {
+        ongoingFetches.delete(bunnyVideoId);
       }
     };
 
     fetchSignedUrl();
 
     return () => {
-      isMounted.current = false;
+      isMountedRef.current = false;
     };
   }, [bunnyVideoId, isLocked]);
 
