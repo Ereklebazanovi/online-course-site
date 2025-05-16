@@ -1,35 +1,20 @@
-//get-bunny-token.server.ts
-
-export const config = {
-  runtime: "edge",
-};
+// File: /api/get-bunny-token.ts
 
 const LIBRARY_ID = "425843";
 const BUNNY_API_KEY = process.env.BUNNY_STREAM_API_KEY!;
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(req: any, res: any) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   try {
-    if (req.method !== "POST") {
-      return new Response(JSON.stringify({ error: "Method not allowed" }), {
-        status: 405,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    // ✅ Parse raw JSON from edge
-    const rawText = await req.text();
-    const body = JSON.parse(rawText || "{}");
-
-    const { videoId } = body;
+    const { videoId } = req.body;
 
     if (!videoId) {
-      return new Response(JSON.stringify({ error: "Missing videoId" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return res.status(400).json({ error: "Missing videoId" });
     }
 
-    // ✅ Setup HMAC signing
     const expires = Math.floor(Date.now() / 1000) + 60;
     const path = `/${LIBRARY_ID}/${videoId}`;
 
@@ -48,23 +33,17 @@ export default async function handler(req: Request): Promise<Response> {
       encoder.encode(path + expires)
     );
 
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
+    const base64 = Buffer.from(new Uint8Array(signature))
+      .toString("base64")
       .replace(/\+/g, "-")
       .replace(/\//g, "_")
       .replace(/=+$/, "");
 
     const signedUrl = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?token=${base64}&expires=${expires}`;
 
-    // ✅ Return quickly
-    return new Response(JSON.stringify({ signedUrl }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return res.status(200).json({ signedUrl });
   } catch (err: any) {
-    console.error("🔥 FINAL ERROR in Edge Function:", err.message || err);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("🔥 Error in Bunny Token API:", err.message || err);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 }
