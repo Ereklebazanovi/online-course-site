@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { Course } from "../courses/types/Course";
 import { Alert, Tag, Button } from "antd";
@@ -9,6 +9,7 @@ import Skeleton from "antd/es/skeleton";
 const CourseDetail = () => {
   const { courseId } = useParams();
   const [course, setCourse] = useState<Course | null>(null);
+  const [firstLessonId, setFirstLessonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -20,6 +21,15 @@ const CourseDetail = () => {
         const courseSnap = await getDoc(courseRef);
         if (courseSnap.exists()) {
           setCourse({ id: courseSnap.id, ...courseSnap.data() } as Course);
+        }
+
+        // Fetch first lesson ID
+        const lessonsRef = collection(db, "courses", courseId, "lessons");
+        const lessonsQuery = query(lessonsRef, orderBy("position"), limit(1));
+        const lessonsSnap = await getDocs(lessonsQuery);
+        const firstDoc = lessonsSnap.docs[0];
+        if (firstDoc) {
+          setFirstLessonId(firstDoc.id);
         }
       } catch (error) {
         console.error("Failed to load course:", error);
@@ -101,11 +111,13 @@ const CourseDetail = () => {
               )}
 
               <div className="flex flex-wrap gap-4">
-                <Link to={`/courses/${courseId}/content`}>
-                  <Button type="primary" size="large">
-                    Explore Course Content
-                  </Button>
-                </Link>
+                {firstLessonId && (
+                  <Link to={`/courses/${courseId}/content/${firstLessonId}`}>
+                    <Button type="primary" size="large">
+                      Explore Course Content
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
 
