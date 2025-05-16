@@ -154,6 +154,9 @@ const CourseContent = () => {
   }, []);
 
   const fetchLessons = async () => {
+    console.log("courseId", courseId);
+console.log("lessons fetched", lessons);
+
     if (!courseId || loadingLessons || !hasMore) return;
     setLoadingLessons(true);
     try {
