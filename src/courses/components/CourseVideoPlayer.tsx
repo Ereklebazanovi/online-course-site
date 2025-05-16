@@ -1,7 +1,8 @@
-import { FC, useEffect, useState, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Button } from "antd";
-import signedUrlCache from "../../utils/videoCache";
+import { getSignedUrl, setSignedUrl } from "../../utils/videoCache";
+
 interface Props {
   title: string;
   isLocked: boolean;
@@ -23,21 +24,26 @@ const CourseVideoPlayer: FC<Props> = ({
   hasPrev,
   bunnyVideoId,
 }) => {
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [signedUrl, setSignedUrlState] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const isMountedRef = useRef(true);
+  const isFetchingRef = useRef<Set<string>>(new Set());
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    isMountedRef.current = true;
+    isMounted.current = true;
+
+    if (!bunnyVideoId || isLocked) return;
+
+    const cached = getSignedUrl(bunnyVideoId);
+    if (cached) {
+      setSignedUrlState(cached);
+      return;
+    }
+
+    if (isFetchingRef.current.has(bunnyVideoId)) return;
+    isFetchingRef.current.add(bunnyVideoId);
 
     const fetchSignedUrl = async () => {
-      if (!bunnyVideoId || isLocked) return;
-
-      if (signedUrlCache.has(bunnyVideoId)) {
-        setSignedUrl(signedUrlCache.get(bunnyVideoId)!);
-        return;
-      }
-
       try {
         const res = await fetch("/api/get-bunny-token", {
           method: "POST",
@@ -45,17 +51,17 @@ const CourseVideoPlayer: FC<Props> = ({
           body: JSON.stringify({ videoId: bunnyVideoId }),
         });
 
-        const { signedUrl } = await res.json();
+        const data = await res.json();
 
-        if (isMountedRef.current && signedUrl) {
-          signedUrlCache.set(bunnyVideoId, signedUrl);
-          setSignedUrl(signedUrl);
-        } else if (isMountedRef.current) {
+        if (isMounted.current && data?.signedUrl) {
+          setSignedUrl(bunnyVideoId, data.signedUrl);
+          setSignedUrlState(data.signedUrl);
+        } else if (isMounted.current) {
           setError("Secure video could not be loaded.");
         }
       } catch (err) {
         console.error("❌ Fetch error:", err);
-        if (isMountedRef.current)
+        if (isMounted.current)
           setError("Something went wrong loading the video.");
       }
     };
@@ -63,14 +69,12 @@ const CourseVideoPlayer: FC<Props> = ({
     fetchSignedUrl();
 
     return () => {
-      isMountedRef.current = false;
+      isMounted.current = false;
     };
   }, [bunnyVideoId, isLocked]);
 
   if (switching) {
-    return (
-      <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />
-    );
+    return <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />;
   }
 
   if (isLocked) {
