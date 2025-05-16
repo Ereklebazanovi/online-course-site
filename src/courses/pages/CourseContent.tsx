@@ -155,15 +155,15 @@ const CourseContent = () => {
 
   const fetchLessons = async () => {
     console.log("courseId", courseId);
-console.log("lessons fetched", lessons);
+    console.log("lessons fetched", lessons);
 
     if (!courseId || loadingLessons || !hasMore) return;
     setLoadingLessons(true);
     try {
       const ref = collection(db, "courses", courseId, "lessons");
       const q = lastDoc
-        ? query(ref, orderBy("order"), startAfter(lastDoc), limit(10))
-        : query(ref, orderBy("order"), limit(10));
+        ? query(ref, orderBy("position"), startAfter(lastDoc), limit(10))
+        : query(ref, orderBy("position"), limit(10));
 
       const snapshot = await getDocs(q);
       const newLessons = snapshot.docs.map((doc) => ({
