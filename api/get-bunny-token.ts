@@ -1,3 +1,5 @@
+//get-bunny-token.server.ts
+
 export const config = {
   runtime: "edge",
 };
