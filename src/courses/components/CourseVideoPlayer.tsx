@@ -1,6 +1,9 @@
 import { FC, useEffect, useRef, useState } from "react";
 import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { Button, Alert } from "antd";
+import { Button } from "antd";
+
+// Simple shared cache to avoid repeat fetches
+const signedUrlCache = new Map<string, string>();
 
 interface Props {
   title: string;
@@ -25,47 +28,35 @@ const CourseVideoPlayer: FC<Props> = ({
 }) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const cacheRef = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     const fetchSignedUrl = async () => {
       if (!bunnyVideoId || isLocked) return;
 
-      // ✅ Use cached signed URL if available
-      if (cacheRef.current.has(bunnyVideoId)) {
-        setSignedUrl(cacheRef.current.get(bunnyVideoId)!);
+      // ✅ Check shared cache
+      if (signedUrlCache.has(bunnyVideoId)) {
+        setSignedUrl(signedUrlCache.get(bunnyVideoId)!);
         return;
       }
 
       try {
         const res = await fetch("/api/get-bunny-token", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ videoId: bunnyVideoId }),
         });
 
-        const text = await res.text();
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (err) {
-          console.error("❌ Failed to parse JSON:", err);
-          setError("Invalid response from server.");
-          return;
-        }
+        const data = await res.json();
 
         if (data?.signedUrl) {
-          cacheRef.current.set(bunnyVideoId, data.signedUrl);
+          signedUrlCache.set(bunnyVideoId, data.signedUrl); // ✅ Cache it
           setSignedUrl(data.signedUrl);
         } else {
           setError("Failed to load secure video.");
         }
       } catch (err) {
-        console.error("Signed URL error:", err);
-        setError("Could not fetch video. Please try again later.");
+        console.error("Signed URL error", err);
+        setError("Something went wrong loading the video.");
       }
     };
 
@@ -88,13 +79,9 @@ const CourseVideoPlayer: FC<Props> = ({
     <div className="space-y-4">
       <div className="aspect-video rounded-xl overflow-hidden shadow relative">
         {error ? (
-          <Alert
-            message="Error loading video"
-            description={error}
-            type="error"
-            showIcon
-            className="absolute inset-0 flex items-center justify-center text-center"
-          />
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 text-sm">
+            {error}
+          </div>
         ) : signedUrl ? (
           <iframe
             src={signedUrl}
