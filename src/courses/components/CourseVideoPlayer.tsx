@@ -1,10 +1,7 @@
 import { FC, useEffect, useState, useRef } from "react";
 import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Button } from "antd";
-
-// Global cache to avoid duplicate fetches
-const signedUrlCache = new Map<string, string>();
-
+import signedUrlCache from "../../utils/videoCache";
 interface Props {
   title: string;
   isLocked: boolean;
@@ -58,9 +55,8 @@ const CourseVideoPlayer: FC<Props> = ({
         }
       } catch (err) {
         console.error("❌ Fetch error:", err);
-        if (isMountedRef.current) {
+        if (isMountedRef.current)
           setError("Something went wrong loading the video.");
-        }
       }
     };
 
@@ -69,11 +65,12 @@ const CourseVideoPlayer: FC<Props> = ({
     return () => {
       isMountedRef.current = false;
     };
-  }, [bunnyVideoId]); // 👈 important: keep dependency array clean
+  }, [bunnyVideoId, isLocked]);
 
-  // UI states
   if (switching) {
-    return <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />;
+    return (
+      <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />
+    );
   }
 
   if (isLocked) {
