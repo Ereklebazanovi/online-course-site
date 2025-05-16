@@ -1,5 +1,3 @@
-
-
 // import { useParams, useLocation } from "react-router-dom";
 // import { getAuth } from "firebase/auth";
 // import { Skeleton, Alert } from "antd";
@@ -107,7 +105,6 @@
 // };
 
 // export default CourseContent;
-
 
 //BUNNy
 // Updated CourseContent.tsx with lazy loading + optimized token fetching
@@ -246,6 +243,7 @@ const CourseContent = () => {
                 </h2>
 
                 <CourseVideoPlayer
+                  key={selectedLesson.id} // 🔥 FORCES remount on lesson change
                   title={selectedLesson.title}
                   bunnyVideoId={selectedLesson.bunnyVideoId || undefined}
                   isLocked={!enrolled && !selectedLesson.isPreview}
