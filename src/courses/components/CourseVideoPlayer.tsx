@@ -32,6 +32,8 @@ const CourseVideoPlayer: FC<Props> = ({
 
   useEffect(() => {
     isMountedRef.current = true;
+    setSignedUrl(null); // 🧼 Reset to force reload
+    setError(null);
 
     if (!bunnyVideoId || isLocked) return;
 
@@ -97,6 +99,7 @@ const CourseVideoPlayer: FC<Props> = ({
           </div>
         ) : signedUrl ? (
           <iframe
+            key={signedUrl} // ✅ forces iframe reload when URL changes
             src={signedUrl}
             allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
