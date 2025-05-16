@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 
@@ -25,18 +25,20 @@ const CourseVideoPlayer: FC<Props> = ({
 }) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const cacheRef = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     const fetchSignedUrl = async () => {
       if (!bunnyVideoId || isLocked) return;
 
-      try {
-        const endpoint =
-          import.meta.env.DEV
-            ? "/mock-signed-url.json"
-            : "/api/get-bunny-token";
+      // ✅ If already cached, reuse it
+      if (cacheRef.current.has(bunnyVideoId)) {
+        setSignedUrl(cacheRef.current.get(bunnyVideoId)!);
+        return;
+      }
 
-        const res = await fetch(endpoint, {
+      try {
+        const res = await fetch("/api/get-bunny-token", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -45,8 +47,6 @@ const CourseVideoPlayer: FC<Props> = ({
         });
 
         const text = await res.text();
-        console.log("🔁 Raw response text:", text);
-
         let data;
         try {
           data = JSON.parse(text);
@@ -57,6 +57,7 @@ const CourseVideoPlayer: FC<Props> = ({
         }
 
         if (data?.signedUrl) {
+          cacheRef.current.set(bunnyVideoId, data.signedUrl);
           setSignedUrl(data.signedUrl);
         } else {
           setError("Failed to load secure video.");
@@ -71,9 +72,7 @@ const CourseVideoPlayer: FC<Props> = ({
   }, [bunnyVideoId, isLocked]);
 
   if (switching) {
-    return (
-      <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />
-    );
+    return <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />;
   }
 
   if (isLocked) {
