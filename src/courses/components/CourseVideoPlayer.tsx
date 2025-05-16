@@ -2,6 +2,7 @@ import { FC, useEffect, useState, useRef } from "react";
 import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 
+// Global cache to avoid duplicate fetches
 const signedUrlCache = new Map<string, string>();
 
 interface Props {
@@ -27,24 +28,19 @@ const CourseVideoPlayer: FC<Props> = ({
 }) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const isFetchingRef = useRef<Set<string>>(new Set());
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
-    if (!bunnyVideoId || isLocked) return;
-
-    // ✅ Check if URL is already cached
-    if (signedUrlCache.has(bunnyVideoId)) {
-      setSignedUrl(signedUrlCache.get(bunnyVideoId)!);
-      return;
-    }
-
-    // ✅ Prevent redundant fetch
-    if (isFetchingRef.current.has(bunnyVideoId)) return;
-    isFetchingRef.current.add(bunnyVideoId);
-
-    let isMounted = true;
+    isMountedRef.current = true;
 
     const fetchSignedUrl = async () => {
+      if (!bunnyVideoId || isLocked) return;
+
+      if (signedUrlCache.has(bunnyVideoId)) {
+        setSignedUrl(signedUrlCache.get(bunnyVideoId)!);
+        return;
+      }
+
       try {
         const res = await fetch("/api/get-bunny-token", {
           method: "POST",
@@ -54,25 +50,28 @@ const CourseVideoPlayer: FC<Props> = ({
 
         const { signedUrl } = await res.json();
 
-        if (isMounted && signedUrl) {
+        if (isMountedRef.current && signedUrl) {
           signedUrlCache.set(bunnyVideoId, signedUrl);
           setSignedUrl(signedUrl);
-        } else if (isMounted) {
+        } else if (isMountedRef.current) {
           setError("Secure video could not be loaded.");
         }
       } catch (err) {
         console.error("❌ Fetch error:", err);
-        if (isMounted) setError("Something went wrong loading the video.");
+        if (isMountedRef.current) {
+          setError("Something went wrong loading the video.");
+        }
       }
     };
 
     fetchSignedUrl();
 
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
     };
-  }, [bunnyVideoId, isLocked]);
+  }, [bunnyVideoId]); // 👈 important: keep dependency array clean
 
+  // UI states
   if (switching) {
     return <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />;
   }
