@@ -31,7 +31,12 @@ const CourseVideoPlayer: FC<Props> = ({
       if (!bunnyVideoId || isLocked) return;
 
       try {
-        const res = await fetch("/api/get-bunny-token", {
+        const endpoint =
+          import.meta.env.DEV
+            ? "/mock-signed-url.json"
+            : "/api/get-bunny-token";
+
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
