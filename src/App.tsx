@@ -62,9 +62,10 @@ function AppContent() {
             />
             <Route path="/courses/:courseId" element={<CourseDetail />} />
             <Route
-              path="/courses/:courseId/content"
+              path="/courses/:courseId/content/:lessonId"
               element={<CourseContent />}
             />
+
             <Route
               path="/dashboard"
               element={
