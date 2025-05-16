@@ -1,125 +1,144 @@
-import { FC, useEffect, useRef, useState } from "react";
-import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { Button, Alert } from "antd";
+import { useEffect, useState } from "react";
+import {
+  getDoc,
+  getDocs,
+  doc,
+  collection,
+  updateDoc,
+  arrayUnion,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { Auth, User } from "firebase/auth";
+import { db } from "../../firebase";
+import { Location } from "react-router-dom";
+import { Lesson } from "../types/Lesson";
 
-interface Props {
-  title: string;
-  isLocked: boolean;
-  switching: boolean;
-  onNext?: () => void;
-  onPrev?: () => void;
-  hasNext?: boolean;
-  hasPrev?: boolean;
-  bunnyVideoId?: string;
-}
-
-const CourseVideoPlayer: FC<Props> = ({
-  title,
-  isLocked,
-  switching,
-  onNext,
-  onPrev,
-  hasNext,
-  hasPrev,
-  bunnyVideoId,
-}) => {
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const cacheRef = useRef<Map<string, string>>(new Map());
+export const useCourseContent = (
+  courseId: string,
+  auth: Auth,
+  openLoginModal: (opts: { redirectTo: string }) => void,
+  location: Location
+) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [switching, setSwitching] = useState(false);
+  const [enrolled, setEnrolled] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchSignedUrl = async () => {
-      if (!bunnyVideoId || isLocked) return;
-
-      // ✅ Use cached signed URL if available
-      if (cacheRef.current.has(bunnyVideoId)) {
-        setSignedUrl(cacheRef.current.get(bunnyVideoId)!);
-        return;
-      }
+    const unsubscribe = auth.onAuthStateChanged(async (u: User | null) => {
+      setUser(u);
+      if (!courseId) return;
 
       try {
-        const res = await fetch("/api/get-bunny-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ videoId: bunnyVideoId }),
-        });
-
-        const text = await res.text();
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (err) {
-          console.error("❌ Failed to parse JSON:", err);
-          setError("Invalid response from server.");
+        const courseRef = doc(db, "courses", courseId);
+        const courseSnap = await getDoc(courseRef);
+        if (!courseSnap.exists()) {
+          setError("Course not found.");
+          setLoading(false);
           return;
         }
 
-        if (data?.signedUrl) {
-          cacheRef.current.set(bunnyVideoId, data.signedUrl);
-          setSignedUrl(data.signedUrl);
-        } else {
-          setError("Failed to load secure video.");
+        const lessonsSnap = await getDocs(
+          collection(db, "courses", courseId, "lessons")
+        );
+        const lessonsData = lessonsSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Lesson[];
+
+        const sortedLessons = lessonsData
+          .sort((a, b) => (a.position ?? 999) - (b.position ?? 999))
+          .sort((a, b) => {
+            const aOpen = enrolled || a.isPreview;
+            const bOpen = enrolled || b.isPreview;
+            return aOpen === bOpen ? 0 : aOpen ? -1 : 1;
+          });
+
+        setLessons(sortedLessons);
+        const firstAvailable = sortedLessons.find(
+          (lesson) => enrolled || lesson.isPreview
+        );
+        setSelectedLesson(firstAvailable || sortedLessons[0]);
+
+        if (u) {
+          const userRef = doc(db, "users", u.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.data()?.enrolledCourses?.includes(courseId)) {
+            setEnrolled(true);
+          }
         }
       } catch (err) {
-        console.error("Signed URL error:", err);
-        setError("Could not fetch video. Please try again later.");
+        console.error("Error loading course:", err);
+        setError("Failed to load course.");
+      } finally {
+        setLoading(false);
       }
-    };
+    });
 
-    fetchSignedUrl();
-  }, [bunnyVideoId, isLocked]);
+    return () => unsubscribe();
+  }, [courseId]);
 
-  if (switching) {
-    return <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />;
-  }
+  const handleLessonClick = (lesson: Lesson) => {
+    const isAccessible = enrolled || lesson.isPreview;
+    if (!isAccessible || lesson.id === selectedLesson?.id) return;
+    setSwitching(true);
+    setTimeout(() => {
+      setSelectedLesson(lesson);
+      setSwitching(false);
+    }, 250);
+  };
 
-  if (isLocked) {
-    return (
-      <div className="bg-yellow-100 text-yellow-800 p-4 rounded-lg text-sm flex items-center gap-2 shadow-sm">
-        <LockOutlined /> This lesson is locked. Please enroll to unlock.
-      </div>
-    );
-  }
+  const handleEnroll = async () => {
+    if (!user) {
+      openLoginModal({ redirectTo: location.pathname });
+    } else {
+      try {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          enrolledCourses: arrayUnion(courseId),
+          [`progress.${courseId}`]: 0,
+        });
 
-  return (
-    <div className="space-y-4">
-      <div className="aspect-video rounded-xl overflow-hidden shadow relative">
-        {error ? (
-          <Alert
-            message="Error loading video"
-            description={error}
-            type="error"
-            showIcon
-            className="absolute inset-0 flex items-center justify-center text-center"
-          />
-        ) : signedUrl ? (
-          <iframe
-            src={signedUrl}
-            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full border-0"
-            title={title}
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 text-sm">
-            Loading video...
-          </div>
-        )}
-      </div>
+        await setDoc(doc(db, "purchases", `${user.uid}_${courseId}`), {
+          userId: user.uid,
+          courseId,
+          status: "paid",
+          createdAt: serverTimestamp(),
+        });
 
-      <div className="flex justify-between items-center">
-        <Button icon={<LeftOutlined />} onClick={onPrev} disabled={!hasPrev}>
-          Previous
-        </Button>
-        <Button icon={<RightOutlined />} onClick={onNext} disabled={!hasNext}>
-          Next
-        </Button>
-      </div>
-    </div>
+        setEnrolled(true);
+      } catch (err) {
+        console.error("Enrollment failed", err);
+        setError("Something went wrong while enrolling.");
+      }
+    }
+  };
+
+  const currentIndex = lessons.findIndex((l) => l.id === selectedLesson?.id);
+  const nextLesson = lessons.find(
+    (_, index) => index > currentIndex && (enrolled || lessons[index].isPreview)
   );
-};
+  const prevLesson = lessons
+    .slice(0, currentIndex)
+    .reverse()
+    .find((lesson) => enrolled || lesson.isPreview);
 
-export default CourseVideoPlayer;
+  return {
+    user,
+    loading,
+    error,
+    lessons,
+    selectedLesson,
+    enrolled,
+    switching,
+    handleLessonClick,
+    handleEnroll,
+    nextLesson,
+    prevLesson,
+    onLessonSelect: setSelectedLesson,
+  };
+};
