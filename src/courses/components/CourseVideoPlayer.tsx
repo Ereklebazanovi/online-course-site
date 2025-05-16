@@ -30,38 +30,49 @@ const CourseVideoPlayer: FC<Props> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSignedUrl = async () => {
-      if (!bunnyVideoId || isLocked) return;
+  if (!bunnyVideoId || isLocked) return;
 
-      // ✅ Check shared cache
-      if (signedUrlCache.has(bunnyVideoId)) {
-        setSignedUrl(signedUrlCache.get(bunnyVideoId)!);
-        return;
+  // Check if URL is already cached
+  if (cacheRef.current.has(bunnyVideoId)) {
+    setSignedUrl(cacheRef.current.get(bunnyVideoId)!);
+    return;
+  }
+
+  let isMounted = true;
+
+  const fetchSignedUrl = async () => {
+    console.log("🔁 Fetching signed URL for:", bunnyVideoId);
+
+    try {
+      const res = await fetch("/api/get-bunny-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ videoId: bunnyVideoId }),
+      });
+
+      const { signedUrl } = await res.json();
+
+      if (isMounted && signedUrl) {
+        cacheRef.current.set(bunnyVideoId, signedUrl);
+        setSignedUrl(signedUrl);
       }
-
-      try {
-        const res = await fetch("/api/get-bunny-token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ videoId: bunnyVideoId }),
-        });
-
-        const data = await res.json();
-
-        if (data?.signedUrl) {
-          signedUrlCache.set(bunnyVideoId, data.signedUrl); // ✅ Cache it
-          setSignedUrl(data.signedUrl);
-        } else {
-          setError("Failed to load secure video.");
-        }
-      } catch (err) {
-        console.error("Signed URL error", err);
-        setError("Something went wrong loading the video.");
+    } catch (err) {
+      console.error("❌ Failed to fetch signed URL", err);
+      if (isMounted) {
+        setError("Could not load video securely.");
       }
-    };
+    }
+  };
 
-    fetchSignedUrl();
-  }, [bunnyVideoId, isLocked]);
+  fetchSignedUrl();
+
+  return () => {
+    isMounted = false; // Avoid setting state after unmount
+  };
+}, [bunnyVideoId, isLocked]);
+
 
   if (switching) {
     return <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />;
