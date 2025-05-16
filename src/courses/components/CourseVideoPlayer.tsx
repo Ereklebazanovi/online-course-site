@@ -1,8 +1,7 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState, useRef } from "react";
 import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 
-// ✅ Global cache to avoid duplicate requests
 const signedUrlCache = new Map<string, string>();
 
 interface Props {
@@ -28,26 +27,28 @@ const CourseVideoPlayer: FC<Props> = ({
 }) => {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const isFetchingRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!bunnyVideoId || isLocked) return;
 
-    // ✅ Already cached
+    // ✅ Check if URL is already cached
     if (signedUrlCache.has(bunnyVideoId)) {
       setSignedUrl(signedUrlCache.get(bunnyVideoId)!);
       return;
     }
 
+    // ✅ Prevent redundant fetch
+    if (isFetchingRef.current.has(bunnyVideoId)) return;
+    isFetchingRef.current.add(bunnyVideoId);
+
     let isMounted = true;
 
     const fetchSignedUrl = async () => {
-      console.log("🔁 Fetching signed URL for:", bunnyVideoId);
       try {
         const res = await fetch("/api/get-bunny-token", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ videoId: bunnyVideoId }),
         });
 
@@ -61,9 +62,7 @@ const CourseVideoPlayer: FC<Props> = ({
         }
       } catch (err) {
         console.error("❌ Fetch error:", err);
-        if (isMounted) {
-          setError("Something went wrong loading the video.");
-        }
+        if (isMounted) setError("Something went wrong loading the video.");
       }
     };
 
