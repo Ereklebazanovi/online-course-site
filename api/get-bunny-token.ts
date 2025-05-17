@@ -75,7 +75,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const expires = Math.floor(Date.now() / 1000) + 60; // expires in 60 seconds
+    const expires = Math.floor(Date.now() / 1000) + 300 // ✅ 5 წუთი
+ // expires in 60 seconds
     const path = `/${LIBRARY_ID}/${videoId}`;
     const encoder = new TextEncoder();
 
