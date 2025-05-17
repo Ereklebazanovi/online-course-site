@@ -135,6 +135,7 @@ import { FC } from "react";
 import { LockOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import { useBunnyVideoUrl } from "../hooks/useBunnyVideoUrl";
+
 interface Props {
   title: string;
   isLocked: boolean;
@@ -159,13 +160,18 @@ const CourseVideoPlayer: FC<Props> = ({
   const {
     data: signedUrl,
     isLoading,
-    error,
+    isError,
+    isFetching,
   } = useBunnyVideoUrl(bunnyVideoId);
 
+  // ⏳ While navigating between lessons
   if (switching) {
-    return <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />;
+    return (
+      <div className="aspect-video bg-gray-100 animate-pulse rounded-xl" />
+    );
   }
 
+  // 🔒 Locked lessons
   if (isLocked) {
     return (
       <div className="bg-yellow-100 text-yellow-800 p-4 rounded-lg text-sm flex items-center gap-2 shadow-sm">
@@ -177,13 +183,13 @@ const CourseVideoPlayer: FC<Props> = ({
   return (
     <div className="space-y-4">
       <div className="aspect-video rounded-xl overflow-hidden shadow relative">
-        {error ? (
+        {isError ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 text-sm">
-            Failed to load video.
+            ❌ Failed to load video. Please try again.
           </div>
-        ) : isLoading ? (
+        ) : isLoading || isFetching ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500 text-sm">
-            Loading video...
+            Loading secure video...
           </div>
         ) : signedUrl ? (
           <iframe
@@ -194,7 +200,11 @@ const CourseVideoPlayer: FC<Props> = ({
             className="w-full h-full border-0"
             title={title}
           />
-        ) : null}
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+            No video found.
+          </div>
+        )}
       </div>
 
       <div className="flex justify-between items-center">
